@@ -11,3 +11,15 @@ dependencies = [
     "flask-wtf",
     "python-dateutil",
 ]
+
+[project.optional-dependencies]
+dev = ["black", "ruff"]
+
+[tool.ruff]
+select = ["E", "F", "I"]
+line-length = 120
+exclude = ["fabfile.py"]
+fixable = ["ALL"]
+
+[tool.black]
+line-length = 120

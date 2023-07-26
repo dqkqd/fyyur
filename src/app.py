@@ -10,8 +10,7 @@ import dateutil.parser
 from flask import Flask, flash, redirect, render_template, request, url_for
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
-
-from forms import *
+from forms import ArtistForm, ShowForm, VenueForm
 
 # ----------------------------------------------------------------------------#
 # App Config.
@@ -572,9 +571,7 @@ def server_error(error):
 
 if not app.debug:
     file_handler = FileHandler("error.log")
-    file_handler.setFormatter(
-        Formatter("%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]")
-    )
+    file_handler.setFormatter(Formatter("%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]"))
     app.logger.setLevel(logging.INFO)
     file_handler.setLevel(logging.INFO)
     app.logger.addHandler(file_handler)
