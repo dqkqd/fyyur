@@ -1,0 +1,13 @@
+
+[project]
+name = "Fyyur"
+version = "0.0"
+authors = []
+dependencies = [
+    "babel",
+    "flask",
+    "flask-moment",
+    "flask_sqlalchemy",
+    "flask-wtf",
+    "python-dateutil",
+]
