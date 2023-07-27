@@ -1,7 +1,7 @@
-from src import create_app
+from fyyur import create_app
 
 if __name__ == "__main__":
-    app = create_app("src.config.NormalConfig")
+    app = create_app("fyyur.config.NormalConfig")
     app.run()
 
 # Or specify port manually:

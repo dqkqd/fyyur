@@ -35,12 +35,12 @@ def create_app(config_object):
     app.config.from_object(config_object)
     app.jinja_env.filters["datetime"] = format_datetime
 
-    from src.model import db
+    from fyyur.model import db
 
     # # TODO: connect to a local postgresql database
     db.init_app(app)
 
-    from src.routes import artist, show, venue
+    from fyyur.routes import artist, show, venue
 
     app.register_blueprint(venue.bp)
     app.register_blueprint(artist.bp)
