@@ -1,7 +1,8 @@
 from fyyur import create_app
+from fyyur.config import NormalConfig
 
 if __name__ == "__main__":
-    app = create_app("fyyur.config.NormalConfig")
+    app = create_app(NormalConfig)
     app.run()
 
 # Or specify port manually:
