@@ -1,5 +1,6 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
-from forms import ArtistForm
+
+from fyyur.forms import ArtistForm
 
 bp = Blueprint("artist", __name__, url_prefix="/artists")
 

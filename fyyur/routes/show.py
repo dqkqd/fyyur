@@ -1,5 +1,6 @@
 from flask import Blueprint, flash, render_template
-from forms import ShowForm
+
+from fyyur.forms import ShowForm
 
 bp = Blueprint("show", __name__, url_prefix="/shows")
 
