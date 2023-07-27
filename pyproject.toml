@@ -6,6 +6,7 @@ authors = []
 dependencies = [
     "babel",
     "flask",
+    "flask_migrate",
     "flask-moment",
     "flask_sqlalchemy",
     "flask-wtf",

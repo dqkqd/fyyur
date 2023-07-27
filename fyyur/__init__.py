@@ -6,6 +6,8 @@ import dateutil.parser
 from flask import Flask, render_template
 from flask_moment import Moment
 
+from fyyur.config import NormalConfig
+
 # ----------------------------------------------------------------------------#
 # Filters.
 # ----------------------------------------------------------------------------#
@@ -25,7 +27,7 @@ def format_datetime(value, format="medium"):
 # ----------------------------------------------------------------------------#
 
 
-def create_app(config_object):
+def create_app(config_object=NormalConfig):
     # ----------------------------------------------------------------------------#
     # App Config.
     # ----------------------------------------------------------------------------#
@@ -35,10 +37,11 @@ def create_app(config_object):
     app.config.from_object(config_object)
     app.jinja_env.filters["datetime"] = format_datetime
 
-    from fyyur.model import db
+    from fyyur.model import db, migrate
 
     # # TODO: connect to a local postgresql database
     db.init_app(app)
+    migrate.init_app(app, db)
 
     from fyyur.routes import artist, show, venue
 

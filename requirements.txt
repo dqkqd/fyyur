@@ -1,6 +1,7 @@
 babel
 flask
 python-dateutil
+flask-migrate
 flask-moment
 flask-wtf
 flask_sqlalchemy
