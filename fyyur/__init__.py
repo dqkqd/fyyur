@@ -39,7 +39,6 @@ def create_app(config_object=NormalConfig):
 
     from fyyur.model import db, migrate
 
-    # # TODO: connect to a local postgresql database
     db.init_app(app)
     migrate.init_app(app, db)
 
