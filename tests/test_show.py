@@ -1,3 +1,5 @@
+import pytest
+
 from fyyur.model import Artist, Show, Venue, db
 from fyyur.routes.show import get_shows
 from fyyur.schema.artist import ArtistSchema
@@ -5,7 +7,8 @@ from fyyur.schema.show import ShowSchema
 from fyyur.schema.venue import VenueSchema
 
 
-def test_get_shows(test_app, client):
+@pytest.fixture(autouse=True, scope="function")
+def mock_test_show_data(test_app):
     venue1 = VenueSchema(id=1, name="Venue1").to_orm(Venue)
 
     artist1 = ArtistSchema(
@@ -40,6 +43,15 @@ def test_get_shows(test_app, client):
         db.session.add(artist2)
         db.session.commit()
 
+
+def test_get_shows_status_200(client):
+    response = client.get("/shows/")
+    assert response.status_code == 200
+    assert b"Venue1" in response.data
+    assert b"Artist1" in response.data
+
+
+def test_get_shows(test_app):
     expected_shows = [
         {
             "venue_id": 1,
