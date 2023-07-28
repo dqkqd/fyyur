@@ -4,7 +4,6 @@ from flask import (
     flash,
     redirect,
     render_template,
-    request,
     url_for,
 )
 from pydantic import ValidationError
@@ -31,36 +30,13 @@ def create_shows():
 
 @bp.route("/create", methods=["POST"])
 def create_show_submission():
-    error = False
-    error_msg = "An error occurred. Show could not be listed."
+    form = ShowForm()
+    ok, msg = insert_show(form)
 
-    try:
-        show_schema = ShowSchema(**request.form)
-        artist_id = show_schema.artist_id
-        venue_id = show_schema.venue_id
-        if not Artist.query.filter_by(id=artist_id).first():
-            error = True
-            error_msg = f"Artist with id `{artist_id}` doesn't exists"
-        elif not Venue.query.filter_by(id=venue_id).first():
-            error = True
-            error_msg = f"Venue with id `{venue_id}` doesn't exists"
-
-        if not error:
-            with current_app.app_context():
-                db.session.add(show_schema.to_orm(Show))
-                db.session.commit()
-
-    except ValidationError as e:
-        error = True
-        if current_app.debug:
-            current_app.logger.error(e)
-
-    if error:
-        flash(error_msg)
-        return redirect(url_for("show.create_shows"))
-
-    flash("Show was successfully listed!")
-    return render_template("pages/home.html")
+    flash(msg)
+    if ok:
+        return render_template("pages/home.html")
+    return redirect(url_for("show.create_shows"))
 
 
 def get_shows():
@@ -81,3 +57,28 @@ def get_shows():
                 ).model_dump(mode="json")
             )
     return shows_response
+
+
+def insert_show(form: ShowForm) -> tuple[bool, str]:
+    if not form.validate():
+        return False, "An error occurred. Show could not be listed."
+
+    try:
+        show_schema = ShowSchema(**form.data)
+        artist_id = show_schema.artist_id
+        venue_id = show_schema.venue_id
+
+        if not Artist.query.filter_by(id=artist_id).first():
+            return False, f"Artist with id `{artist_id}` doesn't exists"
+
+        if not Venue.query.filter_by(id=venue_id).first():
+            return False, f"Venue with id `{venue_id}` doesn't exists"
+
+        with current_app.app_context():
+            db.session.add(show_schema.to_orm(Show))
+            db.session.commit()
+
+    except ValidationError as e:
+        return False, f"{e}"
+
+    return True, "Show was successfully listed!"
