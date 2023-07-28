@@ -21,3 +21,4 @@ class TestingConfig(Config):
     TESTING = True
     db_path = Path(__file__).parent.parent / "tests" / "test.db"
     SQLALCHEMY_DATABASE_URI = "sqlite:///" + str(db_path)
+    WTF_CSRF_ENABLED = False
