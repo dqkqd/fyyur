@@ -29,3 +29,6 @@ line-length = 90
 
 [tool.setuptools]
 py-modules = []
+
+[tool.pytest.ini_options]
+filterwarnings = ["ignore: 'flask.Markup' is deprecated"]
