@@ -16,7 +16,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["black", "ruff"]
+dev = ["black", "pytest", "ruff"]
 
 [tool.ruff]
 select = ["E", "F", "I"]

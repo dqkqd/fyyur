@@ -6,3 +6,5 @@ build/
 .mypy_cache/
 .pytest_cache/
 .vscode/
+test.db
+error.log
