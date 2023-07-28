@@ -1,3 +1,5 @@
+import datetime
+
 import pytest
 
 from fyyur.model import Artist, Show, Venue, db
@@ -82,7 +84,7 @@ def test_create_show_invalid(test_app, client, venue_id: int, artist_id: int):
         data={
             "venue_id": venue_id,
             "artist_id": artist_id,
-            "start_time": "2019-05-21T21:30:00.000Z",
+            "start_time": datetime.datetime(2023, 7, 29, 2, 2, 32),
         },
     )
 
@@ -111,7 +113,7 @@ def test_create_show_successful(test_app, client):
         data={
             "venue_id": 100,
             "artist_id": 200,
-            "start_time": "2019-05-21T21:30:00.000Z",
+            "start_time": datetime.datetime(2023, 7, 29, 2, 2, 32),
         },
     )
 
