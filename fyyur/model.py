@@ -4,10 +4,6 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 migrate = Migrate()
 
-# # ----------------------------------------------------------------------------#
-# # Models.
-# # ----------------------------------------------------------------------------#
-
 
 class Venue(db.Model):
     __tablename__ = "Venue"
@@ -21,7 +17,7 @@ class Venue(db.Model):
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
 
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
+    shows = db.relationship("Show", backref="Venue", lazy=True)
 
 
 class Artist(db.Model):
@@ -36,7 +32,12 @@ class Artist(db.Model):
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
 
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
+    shows = db.relationship("Show", backref="Artist", lazy=True)
 
 
-# TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
+class Show(db.Model):
+    __tablename__ = "Show"
+    id = db.Column(db.Integer, primary_key=True)
+    artist_id = db.Column(db.Integer, db.ForeignKey("Artist.id"))
+    venue_id = db.Column(db.Integer, db.ForeignKey("Venue.id"))
+    start_time = db.Column(db.Date)
