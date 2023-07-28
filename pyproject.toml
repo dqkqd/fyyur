@@ -26,3 +26,6 @@ fixable = ["ALL"]
 
 [tool.black]
 line-length = 90
+
+[tool.setuptools]
+py-modules = []
