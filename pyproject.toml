@@ -11,6 +11,7 @@ dependencies = [
     "flask_sqlalchemy",
     "flask-wtf",
     "psycopg2",
+    "pydantic",
     "python-dateutil",
 ]
 
