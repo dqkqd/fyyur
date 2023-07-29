@@ -32,3 +32,4 @@ py-modules = []
 
 [tool.pytest.ini_options]
 filterwarnings = ["ignore: 'flask.Markup' is deprecated"]
+addopts = "-vvv"
