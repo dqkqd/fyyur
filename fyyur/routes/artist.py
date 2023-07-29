@@ -1,27 +1,15 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
 from fyyur.forms import ArtistForm
+from fyyur.model import Artist
+from fyyur.schema.artist import ArtistBaseSchema
 
 bp = Blueprint("artist", __name__, url_prefix="/artists")
 
 
 @bp.route("/")
 def artists():
-    # TODO: replace with real data returned from querying the database
-    data = [
-        {
-            "id": 4,
-            "name": "Guns N Petals",
-        },
-        {
-            "id": 5,
-            "name": "Matt Quevedo",
-        },
-        {
-            "id": 6,
-            "name": "The Wild Sax Band",
-        },
-    ]
+    data = get_artists()
     return render_template("pages/artists.html", artists=data)
 
 
@@ -185,3 +173,11 @@ def create_artist_submission():
     # TODO: on unsuccessful db insert, flash an error instead.
     # e.g., flash('An error occurred. Artist ' + data.name + ' could not be listed.')
     return render_template("pages/home.html")
+
+
+def get_artists() -> list[dict[str, str]]:
+    artists_from_db = Artist.query.all()
+    artists = [
+        ArtistBaseSchema.model_validate(artist).model_dump() for artist in artists_from_db
+    ]
+    return artists
