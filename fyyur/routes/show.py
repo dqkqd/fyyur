@@ -31,10 +31,7 @@ def create_shows():
 @bp.route("/create", methods=["POST"])
 def create_show_submission():
     form = ShowForm()
-    ok, msg = insert_show(form)
-
-    flash(msg)
-    if ok:
+    if insert_show(form):
         return render_template("pages/home.html")
     return redirect(url_for("show.create_shows"))
 
@@ -59,26 +56,32 @@ def get_shows():
     return shows_response
 
 
-def insert_show(form: ShowForm) -> tuple[bool, str]:
+def insert_show(form: ShowForm) -> bool:
     if not form.validate_on_submit():
-        return False, "An error occurred. Show could not be listed."
+        for error in form.errors.values():
+            for e in error:
+                flash(e, "error")
+        return False
 
     try:
         show_schema = ShowSchema(**form.data)
         artist_id = show_schema.artist_id
         venue_id = show_schema.venue_id
 
-        if not Artist.query.filter_by(id=artist_id).first():
-            return False, f"Artist with id `{artist_id}` doesn't exists"
-
-        if not Venue.query.filter_by(id=venue_id).first():
-            return False, f"Venue with id `{venue_id}` doesn't exists"
+        if (
+            not Artist.query.filter_by(id=artist_id).first()
+            or not Venue.query.filter_by(id=venue_id).first()
+        ):
+            flash("Artist or Venue doesn't exist", "error")
+            return False
 
         with current_app.app_context():
             db.session.add(show_schema.to_orm(Show))
             db.session.commit()
 
     except ValidationError as e:
-        return False, f"{e}"
+        flash(e, "error")
+        return False
 
-    return True, "Show was successfully listed!"
+    flash("Show was successfully listed!", "info")
+    return True
