@@ -10,7 +10,7 @@ from fyyur.schema.venue import VenueInDb
 
 
 @pytest.fixture(autouse=True, scope="function")
-def mock_test_show_data(test_app):
+def mock_test_show_data(app):
     venue1 = VenueInDb(id=1, name="Venue1").to_orm()
 
     artist1 = ArtistInDb(id=1, name="Artist1", image_link="https://example1.com").to_orm()
@@ -35,7 +35,7 @@ def mock_test_show_data(test_app):
     artist1.shows = [show1]
     artist2.shows = [show2]
 
-    with test_app.app_context():
+    with app.app_context():
         db.session.add(venue1)
         db.session.add(artist1)
         db.session.add(artist2)
@@ -49,7 +49,7 @@ def test_get_shows_status_200(client):
     assert b"Artist1" in response.data
 
 
-def test_get_shows(test_app):
+def test_get_shows(app):
     expected_shows = [
         {
             "venue_id": 1,
@@ -69,12 +69,12 @@ def test_get_shows(test_app):
         },
     ]
 
-    with test_app.app_context():
+    with app.app_context():
         assert expected_shows == get_shows()
 
 
 @pytest.mark.parametrize("venue_id, artist_id", [(1, 100), (100, 1), (100, 100)])
-def test_create_show_invalid(test_app, client, venue_id: int, artist_id: int):
+def test_create_show_invalid(app, client, venue_id: int, artist_id: int):
     response = client.post(
         "/shows/create",
         data={
@@ -88,12 +88,12 @@ def test_create_show_invalid(test_app, client, venue_id: int, artist_id: int):
     assert response.status_code == 302
 
     # nothing is inserted into database
-    with test_app.app_context():
+    with app.app_context():
         assert not Show.query.filter_by(venue_id=venue_id, artist_id=artist_id).all()
 
 
-def test_create_show_successful(test_app, client):
-    with test_app.app_context():
+def test_create_show_successful(app, client):
+    with app.app_context():
         venue = VenueInDb(id=100).to_orm()
         artist = ArtistInDb(id=200).to_orm()
         db.session.add(venue)
@@ -101,7 +101,7 @@ def test_create_show_successful(test_app, client):
         db.session.commit()
 
     # this show hasn't exist in database yet
-    with test_app.app_context():
+    with app.app_context():
         assert not Show.query.filter_by(venue_id=100, artist_id=200).all()
 
     show_data = {
@@ -116,7 +116,7 @@ def test_create_show_successful(test_app, client):
 
     # inserted into database
     assert response.status_code == 200
-    with test_app.app_context():
+    with app.app_context():
         shows = Show.query.filter_by(venue_id=100, artist_id=200).all()
         assert len(shows) == 1
 
@@ -126,6 +126,6 @@ def test_create_show_successful(test_app, client):
         data=show_data,
     )
     assert response.status_code == 302
-    with test_app.app_context():
+    with app.app_context():
         shows = Show.query.filter_by(venue_id=100, artist_id=200).all()
         assert len(shows) == 1

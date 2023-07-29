@@ -12,8 +12,8 @@ from fyyur.schema.show import ShowInDb
 from fyyur.schema.venue import VenueInDb
 
 
-def test_get_artists(test_app):
-    with test_app.app_context():
+def test_get_artists(app):
+    with app.app_context():
         artists = get_artists()
         assert not artists, "No artist's existed in database yet"
 
@@ -61,9 +61,9 @@ def test_get_artists(test_app):
     ],
 )
 def test_find_artists(
-    test_app, client, search_term: str, expected_result: list[dict[str, Any]]
+    app, client, search_term: str, expected_result: list[dict[str, Any]]
 ):
-    with test_app.app_context():
+    with app.app_context():
         venue = VenueInDb(id=1).to_orm()
         artists = [
             ArtistInDb(id=1, name="ab1").to_orm(),
@@ -98,7 +98,7 @@ def test_find_artists(
         assert response.status_code == 200
 
     search_schema = SearchSchema(search_term=search_term)
-    with test_app.app_context():
+    with app.app_context():
         artists = find_artists(search_schema)
     assert artists == expected_result
 

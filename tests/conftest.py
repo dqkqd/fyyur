@@ -6,19 +6,19 @@ from fyyur.model import db
 
 
 @pytest.fixture()
-def test_app():
-    app = create_app(TestingConfig)
+def app():
+    test_app = create_app(TestingConfig)
 
-    with app.app_context():
+    with test_app.app_context():
         db.create_all()
 
-    yield app
+    yield test_app
 
-    with app.app_context():
+    with test_app.app_context():
         db.session.remove()
         db.drop_all()
 
 
 @pytest.fixture()
-def client(test_app):
-    return test_app.test_client()
+def client(app):
+    return app.test_client()
