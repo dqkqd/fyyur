@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import HttpUrl
+from pydantic import HttpUrl, field_serializer
 
 from fyyur.model import Show
 from fyyur.schema.base import BaseSchema
@@ -23,3 +23,7 @@ class ShowResponse(ShowBase):
     venue_name: str
     artist_name: str
     artist_image_link: HttpUrl
+
+    @field_serializer("artist_image_link")
+    def serialize_url(self, url: HttpUrl) -> str:
+        return str(url)
