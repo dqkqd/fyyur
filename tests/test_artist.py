@@ -4,7 +4,7 @@ import pytest
 
 from fyyur.model import db
 from fyyur.routes.artist import find_artists, get_artists
-from fyyur.schema.artist import ArtistWithName
+from fyyur.schema.artist import ArtistSearchResponse, ArtistWithName
 from fyyur.schema.base import SearchSchema
 from tests.mock import mock_artist, mock_artists
 
@@ -23,9 +23,9 @@ def test_get_aritsts_status_200(client):
 @pytest.mark.parametrize(
     "search_term, expected_result",
     [
-        ("1", [{"id": 1, "name": "Artist1", "num_upcoming_shows": 2}]),
-        ("2", [{"id": 2, "name": "Artist2", "num_upcoming_shows": 1}]),
-        ("3", [{"id": 3, "name": "Artist3", "num_upcoming_shows": 1}]),
+        ("1", [ArtistSearchResponse(id=1, name="Artist1", num_upcoming_shows=2)]),
+        ("2", [ArtistSearchResponse(id=2, name="Artist2", num_upcoming_shows=1)]),
+        ("3", [ArtistSearchResponse(id=3, name="Artist3", num_upcoming_shows=1)]),
     ],
 )
 def test_basic_find_artists(
@@ -44,9 +44,12 @@ def test_find_artists_case_insensitive(app):
     with app.app_context():
         db.session.add(mock_artist(id=10, name="King"))
         db.session.commit()
-        find_artists(SearchSchema(search_term="k")) == [
-            {"id": 10, "name": "King", "num_upcoming_shows": 0}
-        ]
-        find_artists(SearchSchema(search_term="K")) == [
-            {"id": 10, "name": "King", "num_upcoming_shows": 0}
-        ]
+        find_artists(SearchSchema(search_term="k")) == ArtistSearchResponse(
+            id=10, name="King", num_upcoming_shows=0
+        )
+        find_artists(SearchSchema(search_term="K")) == ArtistSearchResponse(
+            id=10, name="King", num_upcoming_shows=0
+        )
+        find_artists(SearchSchema(search_term="IN")) == ArtistSearchResponse(
+            id=10, name="King", num_upcoming_shows=0
+        )

@@ -1,5 +1,3 @@
-from typing import Any
-
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
 from fyyur.forms import ArtistForm
@@ -19,11 +17,12 @@ def artists():
 @bp.route("/search", methods=["POST"])
 def search_artists():
     search_schema = SearchSchema(**request.form)
-    artists = find_artists(search_schema)
+    data = [artist.model_dump(mode="json") for artist in find_artists(search_schema)]
     response = {
-        "count": len(artists),
-        "data": artists,
+        "count": len(data),
+        "data": data,
     }
+
     return render_template(
         "pages/search_artists.html",
         results=response,
@@ -178,13 +177,10 @@ def get_artists() -> list[ArtistWithName]:
     ]
 
 
-def find_artists(search: SearchSchema) -> list[dict[str, Any]]:
-    artists_from_db = Artist.query.filter(
-        Artist.name.ilike(f"%{search.search_term}%")
-    ).all()
+def find_artists(search: SearchSchema) -> list[ArtistSearchResponse]:
     response = []
-    for artist in artists_from_db:
+    for artist in Artist.query.filter(Artist.name.ilike(f"%{search.search_term}%")).all():
         artist_search_response = ArtistSearchResponse.model_validate(artist)
         artist_search_response.num_upcoming_shows = len(artist.shows)
-        response.append(artist_search_response.model_dump())
+        response.append(artist_search_response)
     return response
