@@ -7,13 +7,15 @@ from fyyur.model import Show
 from fyyur.schema.base import BaseSchema
 
 
-class ShowBase(BaseSchema):
+class ShowBaseAbstract(BaseSchema):
+    def to_orm(self) -> Show:
+        return self.to_orm_base(Show)
+
+
+class ShowBase(ShowBaseAbstract):
     venue_id: int
     artist_id: int
     start_time: datetime
-
-    def to_orm(self) -> Show:
-        return self.to_orm_base(Show)
 
 
 class ShowInDb(ShowBase):
