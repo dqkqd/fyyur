@@ -45,17 +45,7 @@ def get_shows() -> list[ShowResponse]:
     with current_app.app_context():
         shows = Show.query.all()
         for show in shows:
-            show_schema = ShowInDb.model_validate(show)
-            venue = Venue.query.filter_by(id=show_schema.venue_id).first()
-            artist = Artist.query.filter_by(id=show_schema.artist_id).first()
-            shows_response.append(
-                ShowResponse(
-                    **show_schema.model_dump(),
-                    venue_name=venue.name,
-                    artist_name=artist.name,
-                    artist_image_link=artist.image_link,
-                )
-            )
+            shows_response.append(ShowResponse.from_show(show))
     return shows_response
 
 

@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Self
 
 from pydantic import HttpUrl, field_serializer
 
@@ -27,3 +28,14 @@ class ShowResponse(ShowBase):
     @field_serializer("artist_image_link")
     def serialize_url(self, url: HttpUrl) -> str:
         return str(url)
+
+    @classmethod
+    def from_show(cls, show: Show) -> Self:
+        return cls(
+            venue_id=show.venue_id,
+            artist_id=show.artist_id,
+            start_time=show.start_time,
+            venue_name=show.venue.name,
+            artist_name=show.artist.name,
+            artist_image_link=show.artist.image_link,
+        )
