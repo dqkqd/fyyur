@@ -6,7 +6,7 @@ from fyyur.model import Show
 from fyyur.schema.base import BaseSchema
 
 
-class ShowInDb(BaseSchema):
+class ShowBase(BaseSchema):
     venue_id: int
     artist_id: int
     start_time: datetime
@@ -15,7 +15,11 @@ class ShowInDb(BaseSchema):
         return self.to_orm_base(Show)
 
 
-class ShowResponse(ShowInDb):
+class ShowInDb(ShowBase):
+    id: int | None = None
+
+
+class ShowResponse(ShowBase):
     venue_name: str
     artist_name: str
     artist_image_link: HttpUrl
