@@ -2,9 +2,12 @@ from fyyur.schema.base import BaseSchema
 from fyyur.schema.show import ShowSchema
 
 
-class ArtistSchema(BaseSchema):
+class ArtistBaseSchema(BaseSchema):
     id: int
     name: str | None = None
+
+
+class ArtistSchema(ArtistBaseSchema):
     city: str | None = None
     state: str | None = None
     phone: str | None = None
