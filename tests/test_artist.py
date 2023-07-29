@@ -2,10 +2,11 @@ from typing import Any
 
 import pytest
 
+from fyyur.model import db
 from fyyur.routes.artist import find_artists, get_artists
 from fyyur.schema.artist import ArtistWithName
 from fyyur.schema.base import SearchSchema
-from tests.mock import mock_artists
+from tests.mock import mock_artist, mock_artists
 
 
 def test_get_artists(app):
@@ -37,3 +38,15 @@ def test_basic_find_artists(
 
     response = client.post("/artists/search", data=search_schema.model_dump())
     assert response.status_code == 200
+
+
+def test_find_artists_case_insensitive(app):
+    with app.app_context():
+        db.session.add(mock_artist(id=10, name="King"))
+        db.session.commit()
+        find_artists(SearchSchema(search_term="k")) == [
+            {"id": 10, "name": "King", "num_upcoming_shows": 0}
+        ]
+        find_artists(SearchSchema(search_term="K")) == [
+            {"id": 10, "name": "King", "num_upcoming_shows": 0}
+        ]
