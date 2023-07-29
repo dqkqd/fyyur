@@ -60,7 +60,7 @@ def get_shows():
 
 
 def insert_show(form: ShowForm) -> tuple[bool, str]:
-    if not form.validate():
+    if not form.validate_on_submit():
         return False, "An error occurred. Show could not be listed."
 
     try:
