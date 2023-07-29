@@ -15,28 +15,6 @@ def test_get_shows_status_200(client):
     assert b"Artist1" in response.data
 
 
-# TODO: add more test about how we create show with same venue, same artist
-@pytest.mark.parametrize("venue_id, artist_id", [(1, 100), (100, 1), (100, 100)])
-def test_create_show_venue_or_artist_doesnt_exist(
-    app, client, venue_id: int, artist_id: int
-):
-    response = client.post(
-        "/shows/create",
-        data={
-            "venue_id": venue_id,
-            "artist_id": artist_id,
-            "start_time": date_future(days=4),
-        },
-    )
-
-    # redirecting to /shows/create again
-    assert response.status_code == 302
-
-    # nothing is inserted into database
-    with app.app_context():
-        assert not Show.query.filter_by(venue_id=venue_id, artist_id=artist_id).all()
-
-
 def test_create_show_successful(app, client):
     with app.app_context():
         venue = VenueInDb(id=100).to_orm()
@@ -115,3 +93,24 @@ def test_get_shows(app, client):
         all_shows = get_shows()
         for show in expected_shows:
             assert show in all_shows
+
+
+@pytest.mark.parametrize("venue_id, artist_id", [(1, 100), (100, 1), (100, 100)])
+def test_create_show_venue_or_artist_doesnt_exist(
+    app, client, venue_id: int, artist_id: int
+):
+    response = client.post(
+        "/shows/create",
+        data={
+            "venue_id": venue_id,
+            "artist_id": artist_id,
+            "start_time": date_future(days=4),
+        },
+    )
+
+    # redirecting to /shows/create again
+    assert response.status_code == 302
+
+    # nothing is inserted into database
+    with app.app_context():
+        assert not Show.query.filter_by(venue_id=venue_id, artist_id=artist_id).all()
