@@ -10,27 +10,18 @@ from fyyur.schema.artist import ArtistInDb, ArtistWithName
 from fyyur.schema.base import SearchSchema
 from fyyur.schema.show import ShowInDb
 from fyyur.schema.venue import VenueInDb
+from tests.mock import mock_artists
 
 
 def test_get_artists(app):
     with app.app_context():
-        artists = get_artists()
-        assert not artists, "No artist's existed in database yet"
+        artists = [ArtistWithName.model_validate(artist) for artist in mock_artists()]
+        all_artists = get_artists()
+        assert artists == all_artists
 
-        artists_json = [
-            {"id": 1, "name": "Artist1"},
-            {"id": 2, "name": "Artist2"},
-            {"id": 3, "name": "Artist3"},
-            {"id": 4, "name": "Artist4"},
-        ]
 
-        for artist_json in artists_json:
-            artist = ArtistWithName(**artist_json).to_orm()
-            db.session.add(artist)
-        db.session.commit()
-
-        artists = get_artists()
-        assert artists == artists_json
+def test_get_aritsts_status_200(client):
+    assert client.get("/artists/").status_code == 200
 
 
 @pytest.mark.parametrize(

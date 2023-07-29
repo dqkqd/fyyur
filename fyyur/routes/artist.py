@@ -12,7 +12,7 @@ bp = Blueprint("artist", __name__, url_prefix="/artists")
 
 @bp.route("/")
 def artists():
-    data = get_artists()
+    data = [artist.model_dump(mode="json") for artist in get_artists()]
     return render_template("pages/artists.html", artists=data)
 
 
@@ -171,12 +171,11 @@ def create_artist_submission():
     return render_template("pages/home.html")
 
 
-def get_artists() -> list[dict[str, str]]:
-    artists_from_db = Artist.query.all()
-    artists = [
-        ArtistWithName.model_validate(artist).model_dump() for artist in artists_from_db
+def get_artists() -> list[ArtistWithName]:
+    return [
+        ArtistWithName.model_validate(artist)
+        for artist in Artist.query.order_by("id").all()
     ]
-    return artists
 
 
 def find_artists(search: SearchSchema) -> list[dict[str, Any]]:
