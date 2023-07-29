@@ -1,8 +1,10 @@
+from typing import Any
+
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
 from fyyur.forms import ArtistForm
 from fyyur.model import Artist
-from fyyur.schema.artist import ArtistSearchResponse, ArtistWithName
+from fyyur.schema.artist import ArtistInfoResponse, ArtistSearchResponse, ArtistWithName
 from fyyur.schema.base import SearchSchema
 
 bp = Blueprint("artist", __name__, url_prefix="/artists")
@@ -182,3 +184,8 @@ def find_artists(search: SearchSchema) -> list[ArtistSearchResponse]:
         Artist.name.ilike(f"%{search.search_term}%")
     ).all()
     return [ArtistSearchResponse.from_artist(artist=artist) for artist in artists_in_db]
+
+
+def get_artist_info(artist_id: int) -> ArtistInfoResponse | None:
+    artist = Artist.query.filter_by(id=artist_id).first()
+    return ArtistInfoResponse.from_artist(artist=artist)

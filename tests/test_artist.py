@@ -2,11 +2,12 @@ from typing import Any
 
 import pytest
 
-from fyyur.model import db
-from fyyur.routes.artist import find_artists, get_artists
-from fyyur.schema.artist import ArtistSearchResponse, ArtistWithName
+from fyyur.model import Show, db
+from fyyur.routes.artist import find_artists, get_artist_info, get_artists
+from fyyur.schema.artist import ArtistInfoResponse, ArtistSearchResponse, ArtistWithName
 from fyyur.schema.base import SearchSchema
-from tests.mock import mock_artist, mock_artists_db, mock_show
+from fyyur.schema.show import ShowInArtistInfo
+from tests.mock import date_future, mock_artist, mock_artists_db, mock_show
 
 
 def test_get_artists(app):
@@ -73,3 +74,30 @@ def test_find_artists_with_past_shows(app):
         find_artists(SearchSchema(search_term="King")) == ArtistSearchResponse(
             id=10, name="King", num_upcoming_shows=1
         )
+
+
+@pytest.mark.parametrize("artist_id", [(1), (2), (3), (4)])
+def test_get_artist_info(app, artist_id: int):
+    artist = mock_artist(id=artist_id, seeking_venue=True)
+
+    with app.app_context():
+        upcoming_shows = (
+            Show.query.filter_by(artist_id=artist_id)
+            .filter(Show.start_time >= date_future(days=0))
+            .all()
+        )
+        past_shows = (
+            Show.query.filter_by(artist_id=artist_id)
+            .filter(Show.start_time < date_future(days=0))
+            .all()
+        )
+        expected_artist_info = ArtistInfoResponse(
+            **artist.model_dump(exclude=["shows"]),
+            past_shows=list(map(ShowInArtistInfo.from_show, past_shows)),
+            upcoming_shows=list(map(ShowInArtistInfo.from_show, upcoming_shows)),
+            past_shows_count=len(past_shows),
+            upcoming_shows_count=len(upcoming_shows),
+        )
+
+        artist_info = get_artist_info(artist_id=artist_id)
+        assert expected_artist_info == artist_info
