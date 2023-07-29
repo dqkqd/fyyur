@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from flask import (
     Blueprint,
     current_app,
@@ -75,9 +77,18 @@ def insert_show(form: ShowForm) -> bool:
             flash("Artist or Venue doesn't exist", "error")
             return False
 
-        with current_app.app_context():
-            db.session.add(show_schema.to_orm(Show))
-            db.session.commit()
+        offset = timedelta(minutes=1)
+        existed_shows = (
+            Show.query.filter(Show.start_time >= show_schema.start_time - offset)
+            .filter(Show.start_time <= show_schema.start_time + offset)
+            .first()
+        )
+        if existed_shows:
+            flash("Show existed", "error")
+            return False
+
+        db.session.add(show_schema.to_orm(Show))
+        db.session.commit()
 
     except ValidationError as e:
         flash(e, "error")

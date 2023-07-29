@@ -108,17 +108,28 @@ def test_create_show_successful(test_app, client):
     with test_app.app_context():
         assert not Show.query.filter_by(venue_id=100, artist_id=200).all()
 
+    show_data = {
+        "venue_id": 100,
+        "artist_id": 200,
+        "start_time": datetime.datetime(2023, 7, 29, 2, 2, 32),
+    }
     response = client.post(
         "/shows/create",
-        data={
-            "venue_id": 100,
-            "artist_id": 200,
-            "start_time": datetime.datetime(2023, 7, 29, 2, 2, 32),
-        },
+        data=show_data,
     )
 
     # inserted into database
     assert response.status_code == 200
+    with test_app.app_context():
+        shows = Show.query.filter_by(venue_id=100, artist_id=200).all()
+        assert len(shows) == 1
+
+    # could not insert the same show data again
+    response = client.post(
+        "/shows/create",
+        data=show_data,
+    )
+    assert response.status_code == 302
     with test_app.app_context():
         shows = Show.query.filter_by(venue_id=100, artist_id=200).all()
         assert len(shows) == 1
