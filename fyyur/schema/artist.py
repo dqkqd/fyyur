@@ -1,3 +1,6 @@
+from datetime import datetime
+from typing import Self
+
 from fyyur.model import Artist
 from fyyur.schema.base import BaseSchema
 from fyyur.schema.show import ShowInDb
@@ -29,3 +32,11 @@ class ArtistInDb(ArtistWithName):
 
 class ArtistSearchResponse(ArtistWithName):
     num_upcoming_shows: int = 0
+
+    @classmethod
+    def from_artist(cls, artist: Artist) -> Self:
+        artist_search_response = cls.model_validate(artist)
+        artist_search_response.num_upcoming_shows = len(
+            [show for show in artist.shows if show.start_time >= datetime.now()]
+        )
+        return artist_search_response

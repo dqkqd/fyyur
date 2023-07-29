@@ -178,9 +178,7 @@ def get_artists() -> list[ArtistWithName]:
 
 
 def find_artists(search: SearchSchema) -> list[ArtistSearchResponse]:
-    response = []
-    for artist in Artist.query.filter(Artist.name.ilike(f"%{search.search_term}%")).all():
-        artist_search_response = ArtistSearchResponse.model_validate(artist)
-        artist_search_response.num_upcoming_shows = len(artist.shows)
-        response.append(artist_search_response)
-    return response
+    artists_in_db = Artist.query.filter(
+        Artist.name.ilike(f"%{search.search_term}%")
+    ).all()
+    return [ArtistSearchResponse.from_artist(artist=artist) for artist in artists_in_db]
