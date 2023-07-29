@@ -117,3 +117,8 @@ def test_create_show_same_date_different_venue_and_artist(client):
 
     response = add_show(client=client, venue_id=2, artist_id=2, day_offset=100)
     assert response.status_code == 200
+
+
+def test_create_show_in_the_past(client):
+    response = add_show(client=client, venue_id=2, artist_id=2, day_offset=-100)
+    assert response.status_code == 302

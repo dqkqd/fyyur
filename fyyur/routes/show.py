@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from flask import (
     Blueprint,
@@ -70,6 +70,11 @@ def insert_show(form: ShowForm) -> bool:
         show_schema = ShowInDb(**form.data)
         artist_id = show_schema.artist_id
         venue_id = show_schema.venue_id
+        start_time = show_schema.start_time
+
+        if start_time < datetime.now():
+            flash("Could not create show in the past", "error")
+            return False
 
         if (
             not Artist.query.filter_by(id=artist_id).first()
@@ -80,8 +85,8 @@ def insert_show(form: ShowForm) -> bool:
 
         offset = timedelta(minutes=1)
         existed_shows = (
-            Show.query.filter(Show.start_time >= show_schema.start_time - offset)
-            .filter(Show.start_time <= show_schema.start_time + offset)
+            Show.query.filter(Show.start_time >= start_time - offset)
+            .filter(Show.start_time <= start_time + offset)
             .filter(or_(Show.artist_id == artist_id, Show.venue_id == venue_id))
             .first()
         )
