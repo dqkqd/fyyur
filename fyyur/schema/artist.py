@@ -5,7 +5,7 @@ from pydantic import HttpUrl, field_serializer
 
 from fyyur.model import Artist
 from fyyur.schema.base import BaseSchema, GenreEnum
-from fyyur.schema.show import ShowInDb
+from fyyur.schema.show import ShowInArtistInfo, ShowInDb
 
 
 class ArtistBase(BaseSchema):
@@ -31,16 +31,15 @@ class ArtistInDbBase(ArtistWithName):
     seeking_venue: bool = False
     seeking_description: str | None = None
 
-    @field_serializer("image_link")
-    @field_serializer("website")
-    @field_serializer("facebook_link")
+    genres: list[GenreEnum] = []
+
+    @field_serializer("image_link", "website", "facebook_link", return_type=str)
     def serialize_url(self, url: HttpUrl) -> str:
         return str(url)
 
 
 class ArtistInDb(ArtistInDbBase):
     shows: list[ShowInDb] = []
-    genres: list[GenreEnum] = []
 
 
 class ArtistSearchResponse(ArtistWithName):
@@ -53,3 +52,10 @@ class ArtistSearchResponse(ArtistWithName):
             [show for show in artist.shows if show.start_time >= datetime.now()]
         )
         return artist_search_response
+
+
+class ArtistInfoResponse(ArtistInDbBase):
+    past_shows: list[ShowInArtistInfo]
+    upcoming_shows: list[ShowInArtistInfo]
+    past_shows_count: int
+    upcoming_shows_count: int
