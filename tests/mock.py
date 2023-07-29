@@ -17,7 +17,7 @@ def date_past(days: int = 1) -> datetime:
 
 def mock_venue(id: int, name: str | None = None) -> VenueInDb:
     name = name if name is not None else f"Venue{id}"
-    image_link = "https://images.{name}.com"
+    image_link = f"https://images.{name}.com"
     return VenueInDb(id=id, name=name, image_link=image_link)
 
 
