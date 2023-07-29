@@ -10,6 +10,7 @@ dependencies = [
     "flask-moment",
     "flask_sqlalchemy",
     "flask-wtf",
+    "phonenumbers",
     "psycopg2",
     "pydantic",
     "python-dateutil",
