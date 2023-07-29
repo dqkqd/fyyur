@@ -19,13 +19,13 @@ def mock_venues() -> list[Venue]:
     return [VenueInDb(id=id, name=f"Venue{id}").to_orm() for id in range(1, 4)]
 
 
+def mock_artist(id: int, name: str = None) -> Artist:
+    name = name if name is not None else f"Artist{id}"
+    return ArtistInDb(id=id, name=name, image_link=f"https://example{id}.com").to_orm()
+
+
 def mock_artists() -> list[Artist]:
-    return [
-        ArtistInDb(
-            id=id, name=f"Artist{id}", image_link=f"https://example{id}.com"
-        ).to_orm()
-        for id in range(1, 5)
-    ]
+    return [mock_artist(id) for id in range(1, 5)]
 
 
 def mock_shows() -> list[Show]:
