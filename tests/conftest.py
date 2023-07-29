@@ -1,3 +1,5 @@
+import os
+
 import pytest
 
 from fyyur import create_app
@@ -8,6 +10,7 @@ from fyyur.model import db
 @pytest.fixture()
 def app():
     test_app = create_app(TestingConfig)
+    os.remove(test_app.config["TEST_DB_PATH"])
 
     with test_app.app_context():
         db.create_all()

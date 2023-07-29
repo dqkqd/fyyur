@@ -19,6 +19,6 @@ class NormalConfig(Config):
 
 class TestingConfig(Config):
     TESTING = True
-    db_path = Path(__file__).parent.parent / "tests" / "test.db"
-    SQLALCHEMY_DATABASE_URI = "sqlite:///" + str(db_path)
+    TEST_DB_PATH = Path(__file__).parent.parent / "tests" / "test.db"
+    SQLALCHEMY_DATABASE_URI = "sqlite:///" + str(TEST_DB_PATH)
     WTF_CSRF_ENABLED = False
