@@ -1,45 +1,11 @@
-import datetime
-
 import pytest
 
 from fyyur.model import Show, db
 from fyyur.routes.show import get_shows
 from fyyur.schema.artist import ArtistInDb
-from fyyur.schema.show import ShowInDb
+from fyyur.schema.show import ShowBase
 from fyyur.schema.venue import VenueInDb
-
-
-@pytest.fixture(autouse=True, scope="function")
-def mock_test_show_data(app):
-    venue1 = VenueInDb(id=1, name="Venue1").to_orm()
-
-    artist1 = ArtistInDb(id=1, name="Artist1", image_link="https://example1.com").to_orm()
-
-    artist2 = ArtistInDb(id=2, name="Artist2", image_link="https://example2.com").to_orm()
-
-    show1 = ShowInDb(
-        id=1,
-        venue_id=venue1.id,
-        artist_id=artist1.id,
-        start_time="2019-05-21T21:30:00.000Z",
-    ).to_orm()
-
-    show2 = ShowInDb(
-        id=2,
-        venue_id=venue1.id,
-        artist_id=artist2.id,
-        start_time="2019-05-22T21:30:00.000Z",
-    ).to_orm()
-
-    venue1.shows = [show1, show2]
-    artist1.shows = [show1]
-    artist2.shows = [show2]
-
-    with app.app_context():
-        db.session.add(venue1)
-        db.session.add(artist1)
-        db.session.add(artist2)
-        db.session.commit()
+from tests.mock import date_future
 
 
 def test_get_shows_status_200(client):
@@ -49,38 +15,17 @@ def test_get_shows_status_200(client):
     assert b"Artist1" in response.data
 
 
-def test_get_shows(app):
-    expected_shows = [
-        {
-            "venue_id": 1,
-            "venue_name": "Venue1",
-            "artist_id": 1,
-            "artist_name": "Artist1",
-            "artist_image_link": "https://example1.com/",
-            "start_time": "2019-05-21T21:30:00",
-        },
-        {
-            "venue_id": 1,
-            "venue_name": "Venue1",
-            "artist_id": 2,
-            "artist_name": "Artist2",
-            "artist_image_link": "https://example2.com/",
-            "start_time": "2019-05-22T21:30:00",
-        },
-    ]
-
-    with app.app_context():
-        assert expected_shows == get_shows()
-
-
+# TODO: add more test about how we create show with same venue, same artist
 @pytest.mark.parametrize("venue_id, artist_id", [(1, 100), (100, 1), (100, 100)])
-def test_create_show_invalid(app, client, venue_id: int, artist_id: int):
+def test_create_show_venue_or_artist_doesnt_exist(
+    app, client, venue_id: int, artist_id: int
+):
     response = client.post(
         "/shows/create",
         data={
             "venue_id": venue_id,
             "artist_id": artist_id,
-            "start_time": datetime.datetime(2023, 7, 29, 2, 2, 32),
+            "start_time": date_future(days=4),
         },
     )
 
@@ -104,11 +49,12 @@ def test_create_show_successful(app, client):
     with app.app_context():
         assert not Show.query.filter_by(venue_id=100, artist_id=200).all()
 
-    show_data = {
-        "venue_id": 100,
-        "artist_id": 200,
-        "start_time": datetime.datetime(2023, 7, 29, 2, 2, 32),
-    }
+    show_data = ShowBase(
+        venue_id=100,
+        artist_id=200,
+        start_time=date_future(days=100),
+    ).model_dump()
+
     response = client.post(
         "/shows/create",
         data=show_data,
@@ -129,3 +75,43 @@ def test_create_show_successful(app, client):
     with app.app_context():
         shows = Show.query.filter_by(venue_id=100, artist_id=200).all()
         assert len(shows) == 1
+
+
+def test_get_shows(app, client):
+    show1 = ShowBase(
+        venue_id=1,
+        artist_id=1,
+        start_time=date_future(days=100),
+    )
+
+    show2 = ShowBase(
+        venue_id=1,
+        artist_id=2,
+        start_time=date_future(days=200),
+    )
+
+    for show in [show1, show2]:
+        client.post(
+            "/shows/create",
+            data=show.model_dump(),
+        )
+
+    expected_shows = [
+        {
+            **show1.model_dump(mode="json"),
+            "venue_name": "Venue1",
+            "artist_name": "Artist1",
+            "artist_image_link": "https://example1.com/",
+        },
+        {
+            **show2.model_dump(mode="json"),
+            "venue_name": "Venue1",
+            "artist_name": "Artist2",
+            "artist_image_link": "https://example2.com/",
+        },
+    ]
+
+    with app.app_context():
+        all_shows = get_shows()
+        for show in expected_shows:
+            assert show in all_shows
