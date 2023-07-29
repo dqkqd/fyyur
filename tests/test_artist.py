@@ -6,12 +6,12 @@ from fyyur.model import db
 from fyyur.routes.artist import find_artists, get_artists
 from fyyur.schema.artist import ArtistSearchResponse, ArtistWithName
 from fyyur.schema.base import SearchSchema
-from tests.mock import mock_artist, mock_artists, mock_show
+from tests.mock import mock_artist, mock_artists_db, mock_show
 
 
 def test_get_artists(app):
     with app.app_context():
-        artists = [ArtistWithName.model_validate(artist) for artist in mock_artists()]
+        artists = [ArtistWithName.model_validate(artist) for artist in mock_artists_db()]
         all_artists = get_artists()
         assert artists == all_artists
 
@@ -51,7 +51,7 @@ def test_basic_find_artists(
 
 def test_find_artists_case_insensitive(app):
     with app.app_context():
-        db.session.add(mock_artist(id=10, name="King"))
+        db.session.add(mock_artist(id=10, name="King").to_orm())
         db.session.commit()
         find_artists(SearchSchema(search_term="k")) == ArtistSearchResponse(
             id=10, name="King", num_upcoming_shows=0
@@ -66,9 +66,9 @@ def test_find_artists_case_insensitive(app):
 
 def test_find_artists_with_past_shows(app):
     with app.app_context():
-        db.session.add(mock_artist(id=10, name="King"))
-        db.session.add(mock_show(id=10, venue_id=1, artist_id=1, day_offset=-10))
-        db.session.add(mock_show(id=10, venue_id=1, artist_id=1, day_offset=10))
+        db.session.add(mock_artist(id=10, name="King").to_orm())
+        db.session.add(mock_show(venue_id=1, artist_id=1, day_offset=-10).to_orm())
+        db.session.add(mock_show(venue_id=1, artist_id=1, day_offset=10).to_orm())
         db.session.commit()
         find_artists(SearchSchema(search_term="King")) == ArtistSearchResponse(
             id=10, name="King", num_upcoming_shows=1
