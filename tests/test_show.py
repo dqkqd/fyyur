@@ -53,7 +53,7 @@ def test_get_shows(app, client):
             start_time=date_future(100),
             venue_name="Venue1",
             artist_name="Artist1",
-            artist_image_link="https://example1.com/",
+            artist_image_link="https://images.artist1.com/",
         ),
         ShowResponse(
             venue_id=1,
@@ -61,7 +61,7 @@ def test_get_shows(app, client):
             start_time=date_future(200),
             venue_name="Venue1",
             artist_name="Artist2",
-            artist_image_link="https://example2.com/",
+            artist_image_link="https://images.artist2.com/",
         ),
     ]
 

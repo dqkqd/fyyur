@@ -17,16 +17,44 @@ def date_past(days: int = 1) -> datetime:
 
 def mock_venue(id: int, name: str | None = None) -> VenueInDb:
     name = name if name is not None else f"Venue{id}"
-    return VenueInDb(id=id, name=name)
+    image_link = "https://images.{name}.com"
+    return VenueInDb(id=id, name=name, image_link=image_link)
 
 
 def mock_venues_db() -> list[Venue]:
     return [mock_venue(id).to_orm() for id in range(1, 4)]
 
 
-def mock_artist(id: int, name: str = None) -> ArtistInDb:
+def mock_artist(
+    id: int,
+    name: str = None,
+    seeking_venue: str = True,
+) -> ArtistInDb:
     name = name if name is not None else f"Artist{id}"
-    return ArtistInDb(id=id, name=name, image_link=f"https://example{id}.com")
+
+    city = "San Francisco"
+    state = "CA"
+    phone = "326-123-5000"
+
+    name_in_link = name.replace(" ", "").lower()
+    image_link = f"https://images.{name_in_link}.com/"
+    website = f"https://{name_in_link}.com/"
+    facebook_link = f"https://www.facebook.com/{name_in_link}/"
+
+    seeking_description = f"{name} Looking for shows"
+
+    return ArtistInDb(
+        id=id,
+        name=name,
+        city=city,
+        state=state,
+        phone=phone,
+        image_link=image_link,
+        website=website,
+        facebook_link=facebook_link,
+        seeking_venue=seeking_venue,
+        seeking_description=seeking_description,
+    )
 
 
 def mock_artists_db() -> list[Artist]:
