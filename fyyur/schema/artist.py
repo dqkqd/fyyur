@@ -4,7 +4,8 @@ from typing import Self
 from pydantic import HttpUrl, field_serializer
 
 from fyyur.model import Artist, Show
-from fyyur.schema.base import BaseSchema, GenreEnum
+from fyyur.schema.base import BaseSchema
+from fyyur.schema.genre import GenreInDb
 from fyyur.schema.show import ShowInArtistInfo, ShowInDb
 
 
@@ -31,7 +32,7 @@ class ArtistInDbBase(ArtistWithName):
     seeking_venue: bool = False
     seeking_description: str | None = None
 
-    genres: list[GenreEnum] = []
+    genres: list[GenreInDb] = []
 
     @field_serializer("image_link", "website", "facebook_link", return_type=str)
     def serialize_url(self, url: HttpUrl) -> str:

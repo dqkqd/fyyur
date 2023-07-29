@@ -15,28 +15,6 @@ class SearchSchema(BaseModel):
     search_term: str = ""
 
 
-class GenreEnum(Enum):
-    Alternative = "Alternative"
-    Blues = "Blues"
-    Classical = "Classical"
-    Country = "Country"
-    Electronic = "Electronic"
-    Folk = "Folk"
-    Funk = "Funk"
-    HipHop = "Hip-Hop"
-    HeavyMetal = "Heavy Metal"
-    Instrumental = "Instrumental"
-    Jazz = "Jazz"
-    MusicalTheatre = "Musical Theatre"
-    Pop = "Pop"
-    Punk = "Punk"
-    RAndB = "R&B"
-    Reggae = "Reggae"
-    RockNRoll = "Rock n Roll"
-    Soul = "Soul"
-    Other = "Other"
-
-
 class State(Enum):
     AL = "AL"
     AK = "AK"

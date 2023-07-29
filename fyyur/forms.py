@@ -17,7 +17,8 @@ from wtforms import (
 from wtforms.validators import URL, DataRequired
 
 from fyyur.constant import DATETIME_FORMAT
-from fyyur.schema.base import GenreEnum, State
+from fyyur.schema.base import State
+from fyyur.schema.genre import GenreEnum
 
 
 class ConverterMixin:
