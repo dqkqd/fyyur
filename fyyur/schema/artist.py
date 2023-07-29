@@ -5,13 +5,16 @@ from fyyur.schema.show import ShowInDb
 
 class ArtistBase(BaseSchema):
     id: int
-    name: str | None = None
 
     def to_orm(self) -> Artist:
         return self.to_orm_base(Artist)
 
 
-class ArtistInDb(ArtistBase):
+class ArtistWithName(ArtistBase):
+    name: str | None = None
+
+
+class ArtistInDb(ArtistWithName):
     city: str | None = None
     state: str | None = None
     phone: str | None = None

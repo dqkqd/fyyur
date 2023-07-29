@@ -2,7 +2,7 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 
 from fyyur.forms import ArtistForm
 from fyyur.model import Artist
-from fyyur.schema.artist import ArtistBase
+from fyyur.schema.artist import ArtistWithName
 
 bp = Blueprint("artist", __name__, url_prefix="/artists")
 
@@ -178,6 +178,6 @@ def create_artist_submission():
 def get_artists() -> list[dict[str, str]]:
     artists_from_db = Artist.query.all()
     artists = [
-        ArtistBase.model_validate(artist).model_dump() for artist in artists_from_db
+        ArtistWithName.model_validate(artist).model_dump() for artist in artists_from_db
     ]
     return artists
