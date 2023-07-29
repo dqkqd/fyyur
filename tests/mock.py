@@ -15,8 +15,13 @@ def date_past(days: int = 1) -> datetime:
     return (datetime.now() - timedelta(days=days)).strftime(DATETIME_FORMAT)
 
 
-def mock_venues() -> list[Venue]:
-    return [VenueInDb(id=id, name=f"Venue{id}").to_orm() for id in range(1, 4)]
+def mock_venue(id: int, name: str | None = None) -> VenueInDb:
+    name = name if name is not None else f"Venue{id}"
+    return VenueInDb(id=id, name=name)
+
+
+def mock_venues_db() -> list[Venue]:
+    return [mock_venue(id).to_orm() for id in range(1, 4)]
 
 
 def mock_artist(id: int, name: str = None) -> ArtistInDb:
