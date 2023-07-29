@@ -8,3 +8,4 @@ build/
 .vscode/
 test.db
 error.log
+node_modules/
