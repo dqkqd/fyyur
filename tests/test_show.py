@@ -44,16 +44,6 @@ def test_create_show_successful(app, client):
         shows = Show.query.filter_by(venue_id=100, artist_id=200).all()
         assert len(shows) == 1
 
-    # could not insert the same show data again
-    response = client.post(
-        "/shows/create",
-        data=show_data,
-    )
-    assert response.status_code == 302
-    with app.app_context():
-        shows = Show.query.filter_by(venue_id=100, artist_id=200).all()
-        assert len(shows) == 1
-
 
 def test_get_shows(app, client):
     show1 = ShowBase(
@@ -114,3 +104,76 @@ def test_create_show_venue_or_artist_doesnt_exist(
     # nothing is inserted into database
     with app.app_context():
         assert not Show.query.filter_by(venue_id=venue_id, artist_id=artist_id).all()
+
+
+def test_create_show_duplicated(client):
+    start_time = date_future(days=100)
+
+    show = ShowBase(
+        venue_id=1,
+        artist_id=1,
+        start_time=start_time,
+    )
+    response = client.post(
+        "/shows/create",
+        data=show.model_dump(),
+    )
+    assert response.status_code == 200
+
+    response = client.post(
+        "/shows/create",
+        data=show.model_dump(),
+    )
+    assert response.status_code == 302
+
+
+def test_create_show_same_date_same_venue(client):
+    start_time = date_future(days=100)
+
+    show1 = ShowBase(
+        venue_id=1,
+        artist_id=1,
+        start_time=start_time,
+    )
+    response = client.post(
+        "/shows/create",
+        data=show1.model_dump(),
+    )
+    assert response.status_code == 200
+
+    show2 = ShowBase(
+        venue_id=1,
+        artist_id=2,
+        start_time=start_time,
+    )
+    response = client.post(
+        "/shows/create",
+        data=show2.model_dump(),
+    )
+    assert response.status_code == 302
+
+
+def test_create_show_same_date_same_artist(client):
+    start_time = date_future(days=100)
+
+    show1 = ShowBase(
+        venue_id=1,
+        artist_id=1,
+        start_time=start_time,
+    )
+    response = client.post(
+        "/shows/create",
+        data=show1.model_dump(),
+    )
+    assert response.status_code == 200
+
+    show2 = ShowBase(
+        venue_id=2,
+        artist_id=1,
+        start_time=start_time,
+    )
+    response = client.post(
+        "/shows/create",
+        data=show2.model_dump(),
+    )
+    assert response.status_code == 302
