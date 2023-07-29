@@ -1,3 +1,4 @@
+from fyyur.model import Artist
 from fyyur.schema.base import BaseSchema
 from fyyur.schema.show import ShowSchema
 
@@ -5,6 +6,9 @@ from fyyur.schema.show import ShowSchema
 class ArtistBaseSchema(BaseSchema):
     id: int
     name: str | None = None
+
+    def to_orm(self) -> Artist:
+        return self.to_orm_base(Artist)
 
 
 class ArtistSchema(ArtistBaseSchema):
