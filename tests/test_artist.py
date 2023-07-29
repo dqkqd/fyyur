@@ -1,6 +1,6 @@
 from fyyur.model import db
 from fyyur.routes.artist import get_artists
-from fyyur.schema.artist import ArtistSchema
+from fyyur.schema.artist import ArtistInDb
 
 
 def test_get_artists(test_app):
@@ -16,7 +16,7 @@ def test_get_artists(test_app):
         ]
 
         for artist_json in artists_json:
-            artist = ArtistSchema(**artist_json).to_orm()
+            artist = ArtistInDb(**artist_json).to_orm()
             db.session.add(artist)
         db.session.commit()
 

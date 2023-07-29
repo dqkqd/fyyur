@@ -1,16 +1,16 @@
 from fyyur.model import Venue
 from fyyur.schema.base import BaseSchema
-from fyyur.schema.show import ShowSchema
+from fyyur.schema.show import ShowInDb
 
 
-class VenueBaseSchema(BaseSchema):
+class VenueBase(BaseSchema):
     id: int
 
     def to_orm(self) -> Venue:
         return self.to_orm_base(Venue)
 
 
-class VenueSchema(VenueBaseSchema):
+class VenueInDb(VenueBase):
     name: str | None = None
     city: str | None = None
     state: str | None = None
@@ -19,4 +19,4 @@ class VenueSchema(VenueBaseSchema):
     image_link: str | None = None
     facebook_link: str | None = None
 
-    shows: list[ShowSchema] = []
+    shows: list[ShowInDb] = []

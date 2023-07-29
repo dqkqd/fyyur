@@ -4,31 +4,27 @@ import pytest
 
 from fyyur.model import Show, db
 from fyyur.routes.show import get_shows
-from fyyur.schema.artist import ArtistSchema
-from fyyur.schema.show import ShowSchema
-from fyyur.schema.venue import VenueSchema
+from fyyur.schema.artist import ArtistInDb
+from fyyur.schema.show import ShowInDb
+from fyyur.schema.venue import VenueInDb
 
 
 @pytest.fixture(autouse=True, scope="function")
 def mock_test_show_data(test_app):
-    venue1 = VenueSchema(id=1, name="Venue1").to_orm()
+    venue1 = VenueInDb(id=1, name="Venue1").to_orm()
 
-    artist1 = ArtistSchema(
-        id=1, name="Artist1", image_link="https://example1.com"
-    ).to_orm()
+    artist1 = ArtistInDb(id=1, name="Artist1", image_link="https://example1.com").to_orm()
 
-    artist2 = ArtistSchema(
-        id=2, name="Artist2", image_link="https://example2.com"
-    ).to_orm()
+    artist2 = ArtistInDb(id=2, name="Artist2", image_link="https://example2.com").to_orm()
 
-    show1 = ShowSchema(
+    show1 = ShowInDb(
         id=1,
         venue_id=venue1.id,
         artist_id=artist1.id,
         start_time="2019-05-21T21:30:00.000Z",
     ).to_orm()
 
-    show2 = ShowSchema(
+    show2 = ShowInDb(
         id=2,
         venue_id=venue1.id,
         artist_id=artist2.id,
@@ -98,8 +94,8 @@ def test_create_show_invalid(test_app, client, venue_id: int, artist_id: int):
 
 def test_create_show_successful(test_app, client):
     with test_app.app_context():
-        venue = VenueSchema(id=100).to_orm()
-        artist = ArtistSchema(id=200).to_orm()
+        venue = VenueInDb(id=100).to_orm()
+        artist = ArtistInDb(id=200).to_orm()
         db.session.add(venue)
         db.session.add(artist)
         db.session.commit()

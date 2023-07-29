@@ -1,9 +1,9 @@
 from fyyur.model import Artist
 from fyyur.schema.base import BaseSchema
-from fyyur.schema.show import ShowSchema
+from fyyur.schema.show import ShowInDb
 
 
-class ArtistBaseSchema(BaseSchema):
+class ArtistBase(BaseSchema):
     id: int
     name: str | None = None
 
@@ -11,7 +11,7 @@ class ArtistBaseSchema(BaseSchema):
         return self.to_orm_base(Artist)
 
 
-class ArtistSchema(ArtistBaseSchema):
+class ArtistInDb(ArtistBase):
     city: str | None = None
     state: str | None = None
     phone: str | None = None
@@ -19,4 +19,4 @@ class ArtistSchema(ArtistBaseSchema):
     image_link: str | None = None
     facebook_link: str | None = None
 
-    shows: list[ShowSchema] = []
+    shows: list[ShowInDb] = []

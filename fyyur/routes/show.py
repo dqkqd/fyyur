@@ -12,7 +12,7 @@ from pydantic import ValidationError
 
 from fyyur.forms import ShowForm
 from fyyur.model import Artist, Show, Venue, db
-from fyyur.schema.show import ShowResponse, ShowSchema
+from fyyur.schema.show import ShowInDb, ShowResponse
 
 bp = Blueprint("show", __name__, url_prefix="/shows")
 
@@ -44,7 +44,7 @@ def get_shows():
     with current_app.app_context():
         shows = Show.query.all()
         for show in shows:
-            show_schema = ShowSchema.model_validate(show)
+            show_schema = ShowInDb.model_validate(show)
             venue = Venue.query.filter_by(id=show_schema.venue_id).first()
             artist = Artist.query.filter_by(id=show_schema.artist_id).first()
             shows_response.append(
@@ -66,7 +66,7 @@ def insert_show(form: ShowForm) -> bool:
         return False
 
     try:
-        show_schema = ShowSchema(**form.data)
+        show_schema = ShowInDb(**form.data)
         artist_id = show_schema.artist_id
         venue_id = show_schema.venue_id
 
