@@ -16,6 +16,7 @@ from wtforms import (
 )
 from wtforms.validators import URL, DataRequired
 
+from fyyur.constant import DATETIME_FORMAT
 from fyyur.schema.base import GenreEnum, State
 
 
@@ -61,7 +62,10 @@ class ShowForm(FlaskForm):
     artist_id = IntegerField("artist_id", validators=[DataRequired()])
     venue_id = IntegerField("venue_id", validators=[DataRequired()])
     start_time = DateTimeField(
-        "start_time", validators=[DataRequired()], default=datetime.today()
+        "start_time",
+        validators=[DataRequired()],
+        default=datetime.today(),
+        format=DATETIME_FORMAT,
     )
 
 

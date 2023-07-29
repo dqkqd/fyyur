@@ -1,7 +1,9 @@
+from datetime import datetime, timedelta
 from typing import Any
 
 import pytest
 
+from fyyur.constant import DATETIME_FORMAT
 from fyyur.model import db
 from fyyur.routes.artist import find_artists, get_artists
 from fyyur.schema.artist import ArtistInDb, ArtistWithName
@@ -74,9 +76,21 @@ def test_find_artists(
         db.session.commit()
 
     shows = [
-        ShowInDb(venue_id=1, artist_id=1, start_time="2023-07-29 00:00:00"),
-        ShowInDb(venue_id=1, artist_id=2, start_time="2023-07-29 01:00:00"),
-        ShowInDb(venue_id=1, artist_id=2, start_time="2023-07-29 02:00:00"),
+        ShowInDb(
+            venue_id=1,
+            artist_id=1,
+            start_time=(datetime.now() + timedelta(days=1)).strftime(DATETIME_FORMAT),
+        ),
+        ShowInDb(
+            venue_id=1,
+            artist_id=2,
+            start_time=(datetime.now() + timedelta(days=3)).strftime(DATETIME_FORMAT),
+        ),
+        ShowInDb(
+            venue_id=1,
+            artist_id=2,
+            start_time=(datetime.now() + timedelta(days=5)).strftime(DATETIME_FORMAT),
+        ),
     ]
 
     for show in shows:
