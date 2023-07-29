@@ -20,7 +20,7 @@ bp = Blueprint("show", __name__, url_prefix="/shows")
 
 @bp.route("/")
 def shows():
-    data = get_shows()
+    data = [show.model_dump(mode="json") for show in get_shows()]
     return render_template("pages/shows.html", shows=data)
 
 
@@ -39,7 +39,7 @@ def create_show_submission():
     return redirect(url_for("show.create_shows"))
 
 
-def get_shows():
+def get_shows() -> list[ShowResponse]:
     """Seperate `get_shows` so we can test this behavior"""
     shows_response = []
     with current_app.app_context():
@@ -54,7 +54,7 @@ def get_shows():
                     venue_name=venue.name,
                     artist_name=artist.name,
                     artist_image_link=artist.image_link,
-                ).model_dump(mode="json")
+                )
             )
     return shows_response
 

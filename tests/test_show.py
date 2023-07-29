@@ -3,7 +3,7 @@ import pytest
 from fyyur.model import Show, db
 from fyyur.routes.show import get_shows
 from fyyur.schema.artist import ArtistInDb
-from fyyur.schema.show import ShowBase
+from fyyur.schema.show import ShowBase, ShowResponse
 from fyyur.schema.venue import VenueInDb
 from tests.mock import date_future
 
@@ -65,18 +65,18 @@ def test_get_shows(app, client):
         )
 
     expected_shows = [
-        {
-            **show1.model_dump(mode="json"),
-            "venue_name": "Venue1",
-            "artist_name": "Artist1",
-            "artist_image_link": "https://example1.com/",
-        },
-        {
+        ShowResponse(
+            **show1.model_dump(),
+            venue_name="Venue1",
+            artist_name="Artist1",
+            artist_image_link="https://example1.com/",
+        ),
+        ShowResponse(
             **show2.model_dump(mode="json"),
-            "venue_name": "Venue1",
-            "artist_name": "Artist2",
-            "artist_image_link": "https://example2.com/",
-        },
+            venue_name="Venue1",
+            artist_name="Artist2",
+            artist_image_link="https://example2.com/",
+        ),
     ]
 
     with app.app_context():
