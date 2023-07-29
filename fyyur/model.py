@@ -4,6 +4,12 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 migrate = Migrate()
 
+venue_genre = db.Table(
+    "venue_genres",
+    db.Column("venue_id", db.Integer, db.ForeignKey("Venue.id"), primary_key=True),
+    db.Column("genre_id", db.Integer, db.ForeignKey("Genre.id"), primary_key=True),
+)
+
 
 class Venue(db.Model):
     __tablename__ = "Venue"
@@ -14,10 +20,22 @@ class Venue(db.Model):
     state = db.Column(db.String(120))
     address = db.Column(db.String(120))
     phone = db.Column(db.String(120))
-    image_link = db.Column(db.String(500))
-    facebook_link = db.Column(db.String(120))
+
+    image_link = db.Column(db.String(500), nullable=True)
+    facebook_link = db.Column(db.String(120), nullable=True)
+    website = db.Column(db.String(120), nullable=True)
+
+    seeking_talent = db.Column(db.Boolean, default=False)
+    seeking_description = db.Column(db.String)
 
     shows = db.relationship("Show", backref="Venue", lazy=True)
+
+    genres = db.relationship(
+        "Genre",
+        secondary=venue_genre,
+        lazy="subquery",
+        backref=db.backref("Venue", lazy=True),
+    )
 
 
 artist_genre = db.Table(
