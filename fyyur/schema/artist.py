@@ -23,3 +23,5 @@ class ArtistInDb(ArtistWithName):
     facebook_link: str | None = None
 
     shows: list[ShowInDb] = []
+
+    genres: list[str] = []
