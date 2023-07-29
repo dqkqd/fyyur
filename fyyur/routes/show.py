@@ -9,6 +9,7 @@ from flask import (
     url_for,
 )
 from pydantic import ValidationError
+from sqlalchemy import or_
 
 from fyyur.forms import ShowForm
 from fyyur.model import Artist, Show, Venue, db
@@ -81,6 +82,7 @@ def insert_show(form: ShowForm) -> bool:
         existed_shows = (
             Show.query.filter(Show.start_time >= show_schema.start_time - offset)
             .filter(Show.start_time <= show_schema.start_time + offset)
+            .filter(or_(Show.artist_id == artist_id, Show.venue_id == venue_id))
             .first()
         )
         if existed_shows:

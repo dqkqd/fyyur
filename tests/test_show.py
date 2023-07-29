@@ -177,3 +177,29 @@ def test_create_show_same_date_same_artist(client):
         data=show2.model_dump(),
     )
     assert response.status_code == 302
+
+
+def test_create_show_same_date_different_venue_and_artist(client):
+    start_time = date_future(days=100)
+
+    show1 = ShowBase(
+        venue_id=1,
+        artist_id=1,
+        start_time=start_time,
+    )
+    response = client.post(
+        "/shows/create",
+        data=show1.model_dump(),
+    )
+    assert response.status_code == 200
+
+    show2 = ShowBase(
+        venue_id=2,
+        artist_id=2,
+        start_time=date_future(days=100),
+    )
+    response = client.post(
+        "/shows/create",
+        data=show2.model_dump(),
+    )
+    assert response.status_code == 200
