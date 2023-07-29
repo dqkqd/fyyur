@@ -11,6 +11,10 @@ class BaseSchema(BaseModel):
         return orm_class(**self.model_dump())
 
 
+class SearchSchema(BaseModel):
+    search_term: str = ""
+
+
 class GenreEnum(Enum):
     Alternative = "Alternative"
     Blues = "Blues"

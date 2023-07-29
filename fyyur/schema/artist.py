@@ -25,3 +25,7 @@ class ArtistInDb(ArtistWithName):
     shows: list[ShowInDb] = []
 
     genres: list[str] = []
+
+
+class ArtistSearchResponse(ArtistWithName):
+    num_upcoming_shows: int = 0

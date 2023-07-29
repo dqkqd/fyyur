@@ -1,6 +1,13 @@
+from typing import Any
+
+import pytest
+
 from fyyur.model import db
-from fyyur.routes.artist import get_artists
-from fyyur.schema.artist import ArtistWithName
+from fyyur.routes.artist import find_artists, get_artists
+from fyyur.schema.artist import ArtistInDb, ArtistWithName
+from fyyur.schema.base import SearchSchema
+from fyyur.schema.show import ShowInDb
+from fyyur.schema.venue import VenueInDb
 
 
 def test_get_artists(test_app):
@@ -22,3 +29,64 @@ def test_get_artists(test_app):
 
         artists = get_artists()
         assert artists == artists_json
+
+
+@pytest.mark.parametrize(
+    "search_term, expected_result",
+    [
+        ("b", [{"id": 1, "name": "ab1", "num_upcoming_shows": 1}]),
+        ("B", [{"id": 1, "name": "ab1", "num_upcoming_shows": 1}]),
+        ("1", [{"id": 1, "name": "ab1", "num_upcoming_shows": 1}]),
+        ("2", [{"id": 2, "name": "Ac2", "num_upcoming_shows": 2}]),
+        ("3", [{"id": 3, "name": "ad3", "num_upcoming_shows": 0}]),
+        ("4", []),
+        (
+            "a",
+            [
+                {"id": 1, "name": "ab1", "num_upcoming_shows": 1},
+                {"id": 2, "name": "Ac2", "num_upcoming_shows": 2},
+                {"id": 3, "name": "ad3", "num_upcoming_shows": 0},
+            ],
+        ),
+        (
+            "A",
+            [
+                {"id": 1, "name": "ab1", "num_upcoming_shows": 1},
+                {"id": 2, "name": "Ac2", "num_upcoming_shows": 2},
+                {"id": 3, "name": "ad3", "num_upcoming_shows": 0},
+            ],
+        ),
+    ],
+)
+def test_find_artists(
+    test_app, client, search_term: str, expected_result: list[dict[str, Any]]
+):
+    with test_app.app_context():
+        venue = VenueInDb(id=1).to_orm()
+        artists = [
+            ArtistInDb(id=1, name="ab1").to_orm(),
+            ArtistInDb(id=2, name="Ac2").to_orm(),
+            ArtistInDb(id=3, name="ad3").to_orm(),
+        ]
+        db.session.add(venue)
+        for artist in artists:
+            db.session.add(artist)
+        db.session.commit()
+
+    shows = [
+        ShowInDb(venue_id=1, artist_id=1, start_time="2023-07-29 00:00:00"),
+        ShowInDb(venue_id=1, artist_id=2, start_time="2023-07-29 01:00:00"),
+        ShowInDb(venue_id=1, artist_id=2, start_time="2023-07-29 02:00:00"),
+    ]
+
+    for show in shows:
+        response = client.post("/shows/create", data=show.model_dump())
+        assert response.status_code == 200
+
+    search_schema = SearchSchema(search_term=search_term)
+    with test_app.app_context():
+        artists = find_artists(search_schema)
+    assert artists == expected_result
+
+    response = client.post("/artists/search", data=search_schema.model_dump())
+    assert response.status_code == 200

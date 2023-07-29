@@ -1,8 +1,11 @@
+from typing import Any
+
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
 from fyyur.forms import ArtistForm
 from fyyur.model import Artist
-from fyyur.schema.artist import ArtistWithName
+from fyyur.schema.artist import ArtistSearchResponse, ArtistWithName
+from fyyur.schema.base import SearchSchema
 
 bp = Blueprint("artist", __name__, url_prefix="/artists")
 
@@ -15,23 +18,16 @@ def artists():
 
 @bp.route("/search", methods=["POST"])
 def search_artists():
-    # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
-    # seach for "A" should return "Guns N Petals", "Matt Quevado", and "The Wild Sax Band".
-    # search for "band" should return "The Wild Sax Band".
+    search_schema = SearchSchema(**request.form)
+    artists = find_artists(search_schema)
     response = {
-        "count": 1,
-        "data": [
-            {
-                "id": 4,
-                "name": "Guns N Petals",
-                "num_upcoming_shows": 0,
-            }
-        ],
+        "count": len(artists),
+        "data": artists,
     }
     return render_template(
         "pages/search_artists.html",
         results=response,
-        search_term=request.form.get("search_term", ""),
+        search_term=search_schema.search_term,
     )
 
 
@@ -181,3 +177,15 @@ def get_artists() -> list[dict[str, str]]:
         ArtistWithName.model_validate(artist).model_dump() for artist in artists_from_db
     ]
     return artists
+
+
+def find_artists(search: SearchSchema) -> list[dict[str, Any]]:
+    artists_from_db = Artist.query.filter(
+        Artist.name.ilike(f"%{search.search_term}%")
+    ).all()
+    response = []
+    for artist in artists_from_db:
+        artist_search_response = ArtistSearchResponse.model_validate(artist)
+        artist_search_response.num_upcoming_shows = len(artist.shows)
+        response.append(artist_search_response.model_dump())
+    return response
