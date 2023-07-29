@@ -3,7 +3,7 @@ from typing import Self
 
 from pydantic import HttpUrl, field_serializer
 
-from fyyur.model import Artist
+from fyyur.model import Artist, Show
 from fyyur.schema.base import BaseSchema, GenreEnum
 from fyyur.schema.show import ShowInArtistInfo, ShowInDb
 
@@ -59,3 +59,26 @@ class ArtistInfoResponse(ArtistInDbBase):
     upcoming_shows: list[ShowInArtistInfo]
     past_shows_count: int
     upcoming_shows_count: int
+
+    @classmethod
+    def from_artist(cls, artist: Artist) -> Self:
+        artist_in_db_base = ArtistInDbBase.model_validate(artist)
+
+        def is_past(show: Show) -> bool:
+            return show.start_time < datetime.now()
+
+        def is_future(show: Show) -> bool:
+            return not is_past(show)
+
+        past_shows = list(map(ShowInArtistInfo.from_show, filter(is_past, artist.shows)))
+        upcoming_shows = list(
+            map(ShowInArtistInfo.from_show, filter(is_future, artist.shows))
+        )
+
+        return cls(
+            **artist_in_db_base.model_dump(),
+            past_shows=past_shows,
+            upcoming_shows=upcoming_shows,
+            past_shows_count=len(past_shows),
+            upcoming_shows_count=len(upcoming_shows)
+        )
