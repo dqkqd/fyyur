@@ -39,7 +39,7 @@ def mock_artist(
 
     name_in_link = name.replace(" ", "").lower()
     image_link = f"https://images.{name_in_link}.com/"
-    website = f"https://{name_in_link}.com/"
+    website_link = f"https://{name_in_link}.com/"
     facebook_link = f"https://www.facebook.com/{name_in_link}/"
 
     seeking_description = f"{name} Looking for shows"
@@ -51,7 +51,7 @@ def mock_artist(
         state=state,
         phone=phone,
         image_link=image_link,
-        website=website,
+        website_link=website_link,
         facebook_link=facebook_link,
         seeking_venue=seeking_venue,
         seeking_description=seeking_description,

@@ -26,15 +26,15 @@ class ArtistInDbBase(ArtistWithName):
     phone: str | None = None
 
     image_link: HttpUrl | None = None
-    website: HttpUrl | None = None
     facebook_link: HttpUrl | None = None
+    website_link: HttpUrl | None = None
 
     seeking_venue: bool = False
     seeking_description: str | None = None
 
     genres: list[GenreInDb] = []
 
-    @field_serializer("image_link", "website", "facebook_link", return_type=str)
+    @field_serializer("image_link", "facebook_link", "website_link", return_type=str)
     def serialize_url(self, url: HttpUrl) -> str:
         return str(url)
 

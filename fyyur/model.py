@@ -23,7 +23,7 @@ class Venue(db.Model):
 
     image_link = db.Column(db.String(500), nullable=True)
     facebook_link = db.Column(db.String(120), nullable=True)
-    website = db.Column(db.String(120), nullable=True)
+    website_link = db.Column(db.String(120), nullable=True)
 
     seeking_talent = db.Column(db.Boolean, default=False)
     seeking_description = db.Column(db.String)
@@ -56,7 +56,7 @@ class Artist(db.Model):
 
     image_link = db.Column(db.String(500), nullable=True)
     facebook_link = db.Column(db.String(120), nullable=True)
-    website = db.Column(db.String(120), nullable=True)
+    website_link = db.Column(db.String(120), nullable=True)
 
     seeking_venue = db.Column(db.Boolean, default=False)
     seeking_description = db.Column(db.String)
