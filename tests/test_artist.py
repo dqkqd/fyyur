@@ -111,12 +111,12 @@ def test_find_artists_with_past_shows(app: Flask) -> None:
 def test_get_artist_info(app: Flask, artist_id: int, genres: list[GenreEnum]) -> None:
     artist = mock_artist(id=artist_id, seeking_venue=True)
     with app.app_context():
-        upcoming_shows = (
+        upcoming_shows: list[Show] = (
             Show.query.filter_by(artist_id=artist_id)
             .filter(Show.start_time >= date_future(days=0))
             .all()
         )
-        past_shows = (
+        past_shows: list[Show] = (
             Show.query.filter_by(artist_id=artist_id)
             .filter(Show.start_time < date_future(days=0))
             .all()
@@ -124,10 +124,8 @@ def test_get_artist_info(app: Flask, artist_id: int, genres: list[GenreEnum]) ->
         expected_artist_info = ArtistInfoResponse(
             **artist.model_dump(exclude={"shows", "genres"}),
             genres=genres,
-            past_shows=list(map(lambda show: show.to_show_in_artist_info(), past_shows)),
-            upcoming_shows=list(
-                map(lambda show: show.to_show_in_artist_info(), upcoming_shows)
-            ),
+            past_shows=[show.show_in_artist_info for show in past_shows],
+            upcoming_shows=[show.show_in_artist_info for show in upcoming_shows],
             past_shows_count=len(past_shows),
             upcoming_shows_count=len(upcoming_shows),
         )

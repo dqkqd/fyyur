@@ -43,8 +43,8 @@ def create_show_submission() -> FlaskResponse | str:
 def get_shows() -> list[ShowResponse]:
     """Seperate `get_shows` so we can test this behavior"""
     with current_app.app_context():
-        shows = list(map(lambda show: show.to_show_response(), Show.query.all()))
-    return shows
+        shows: list[Show] = Show.query.all()
+        return [show.show_response for show in shows]
 
 
 def insert_show(form: ShowForm) -> bool:

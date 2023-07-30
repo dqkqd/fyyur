@@ -105,23 +105,22 @@ class Artist(db.Model):  # type: ignore
     def past_shows_count(self) -> int:
         return len(self.past_shows)
 
-    def to_search_response(self) -> ArtistSearchResponse:
+    @property
+    def artist_search_response(self) -> ArtistSearchResponse:
         return ArtistSearchResponse(
             name=self.name, num_upcoming_shows=self.upcoming_shows_count
         )
 
-    def to_basic_info_base(self) -> ArtistBasicInfoBase:
+    @property
+    def artist_basic_info_base(self) -> ArtistBasicInfoBase:
         return ArtistBasicInfoBase.model_validate(self)
 
-    def to_info_response(self) -> ArtistInfoResponse:
-        basic_info_base = self.to_basic_info_base()
-        upcomming_shows = [show.to_show_in_artist_info() for show in self.upcoming_shows]
-        past_shows = [show.to_show_in_artist_info() for show in self.past_shows]
-        print(self.upcoming_shows_count)
+    @property
+    def artist_info_response(self) -> ArtistInfoResponse:
         return ArtistInfoResponse(
-            **basic_info_base.model_dump(),
-            upcoming_shows=upcomming_shows,
-            past_shows=past_shows,
+            **self.artist_basic_info_base.model_dump(),
+            upcoming_shows=[show.show_in_artist_info for show in self.upcoming_shows],
+            past_shows=[show.show_in_artist_info for show in self.past_shows],
             upcoming_shows_count=self.upcoming_shows_count,
             past_shows_count=self.past_shows_count,
         )
@@ -171,13 +170,16 @@ class Show(db.Model):  # type: ignore
     def is_future(self) -> bool:
         return not self.is_past
 
-    def to_show_base(self) -> ShowBase:
+    @property
+    def show_base(self) -> ShowBase:
         return ShowBase.model_validate(self)
 
-    def to_show_in_db(self) -> ShowInDb:
+    @property
+    def show_in_db(self) -> ShowInDb:
         return ShowInDb.model_validate(self)
 
-    def to_show_response(self) -> ShowResponse:
+    @property
+    def show_response(self) -> ShowResponse:
         return ShowResponse(
             venue_id=self.venue.id,
             artist_id=self.artist.id,
@@ -187,7 +189,8 @@ class Show(db.Model):  # type: ignore
             artist_image_link=self.artist.image_link,
         )
 
-    def to_show_in_artist_info(self) -> ShowInArtistInfo:
+    @property
+    def show_in_artist_info(self) -> ShowInArtistInfo:
         return ShowInArtistInfo(
             venue_id=self.venue_id,
             venue_name=self.venue.name,
