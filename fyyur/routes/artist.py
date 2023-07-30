@@ -58,7 +58,7 @@ def edit_artist(artist_id: int) -> str:
         "city": "San Francisco",
         "state": "CA",
         "phone": "326-123-5000",
-        "website": "https://www.gunsnpetalsband.com",
+        "website_link": "https://www.gunsnpetalsband.com",
         "facebook_link": "https://www.facebook.com/GunsNPetals",
         "seeking_venue": True,
         "seeking_description": "Looking for shows to perform at in the San Francisco Bay Area!",
