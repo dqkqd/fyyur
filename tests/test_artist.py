@@ -124,3 +124,11 @@ def test_get_artist_info(app, artist_id: int, genres: list[GenreEnum]):
 
         artist_info = get_artist_info(artist_id=artist_id)
         assert expected_artist_info == artist_info
+
+
+def test_show_artist(client):
+    response = client.get("artists/1")
+    assert response.status_code == 200
+
+    response = client.get("artists/100")
+    assert response.status_code == 404
