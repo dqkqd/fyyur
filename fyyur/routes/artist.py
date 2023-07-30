@@ -2,14 +2,16 @@ from flask import Blueprint, abort, flash, redirect, render_template, request, u
 from werkzeug.wrappers.response import Response as FlaskResponse
 
 from fyyur.forms import ArtistForm
-from fyyur.models import Artist
+from fyyur.models import Artist, Genre, db
 from fyyur.schema.artist import (
-    ArtistInDb,
+    ArtistInfo,
     ArtistInfoResponse,
+    ArtistInForm,
     ArtistResponse,
     ArtistSearchResponse,
 )
 from fyyur.schema.base import SearchSchema
+from fyyur.schema.genre import GenreBase
 
 bp = Blueprint("artist", __name__, url_prefix="/artists")
 
@@ -124,16 +126,29 @@ def get_artist_info(artist_id: int) -> ArtistInfoResponse | None:
 
 
 def insert_artist(form: ArtistForm) -> bool:
-    print(request.form)
-    print(form.data)
     if not form.validate_on_submit():
         for error in form.errors.values():
             for e in error:
                 flash(e, "error")
-                print(e)
         return False
 
-    artist = ArtistInDb(**form.data)
-    print(artist)
+    status: bool = True
+    try:
+        artist_in_form = ArtistInForm(**form.data)
+        artist = ArtistInfo(**form.data).to_orm(Artist)
+        artist.genres = [
+            GenreBase(name=genre).to_orm(Genre) for genre in artist_in_form.genres
+        ]
+        db.session.add(artist)
+        db.session.commit()
+        flash(f"Artist: {artist_in_form.name} was successfully listed!")
 
-    return False
+    except Exception as e:
+        flash(f"{e}", "error")
+        db.session.rollback()
+        status = False
+
+    finally:
+        db.session.close()
+
+    return status

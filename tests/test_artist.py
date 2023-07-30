@@ -9,7 +9,7 @@ from fyyur.models import Artist, Show, db
 from fyyur.routes.artist import find_artists, get_artist_info, get_artists
 from fyyur.schema.base import SearchSchema
 from fyyur.schema.genre import GenreEnum
-from tests.mock import mock_artist, mock_genre, mock_show
+from tests.mock import mock_artist, mock_show
 from tests.utils import date_future, date_past, same_time
 
 
@@ -243,11 +243,14 @@ def test_show_artist(client: FlaskClient) -> None:
     assert response.status_code == 404
 
 
-def test_insert_artist(client: FlaskClient) -> None:
-    artist = mock_artist(id=10, seeking_venue=True)
-    artist.genres = [mock_genre(None, genre=GenreEnum.Country)]
-    # print(artist.model_dump_json())
-    # response = client.post("/artists/create", data=artist_in_form.model_dump())
-    # print(response.status_code)
-    # assert False
-    pass
+def test_basic_insert_artist(app: Flask, client: FlaskClient) -> None:
+    artist = mock_artist(id=10, name="King", seeking_venue=True)
+    artist_in_form = artist.to_orm(Artist).artist_in_form
+    artist_in_form.genres = [GenreEnum.Blues, GenreEnum.Pop]
+    response = client.post("/artists/create", data=artist_in_form.model_dump())
+    assert response.status_code == 200
+
+    with app.app_context():
+        artists: list[Artist] = Artist.query.filter_by(name="King").all()
+        assert len(artists) == 1
+        assert artists[0].artist_in_form == artist_in_form
