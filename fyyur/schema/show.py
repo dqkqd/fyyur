@@ -7,16 +7,7 @@ from fyyur.models.show import Show
 from fyyur.schema.base import BaseSchema
 
 
-class ShowBaseAbstract(BaseSchema):
-    def to_orm(self) -> Show:
-        return self.to_orm_base(Show)
-
-    @classmethod
-    def from_show(cls, show: Show) -> Self:
-        raise NotImplementedError
-
-
-class ShowBase(ShowBaseAbstract):
+class ShowBase(BaseSchema):
     venue_id: int
     artist_id: int
     start_time: datetime
@@ -47,7 +38,7 @@ class ShowResponse(ShowBase):
         )
 
 
-class ShowInArtistInfo(ShowBaseAbstract):
+class ShowInArtistInfo(BaseSchema):
     venue_id: int
     venue_name: str
     venue_image_link: HttpUrl

@@ -2,7 +2,9 @@ import pytest
 from flask import Response
 
 from fyyur.models import db
+from fyyur.models.artist import Artist
 from fyyur.models.show import Show
+from fyyur.models.venue import Venue
 from fyyur.routes.show import get_shows
 from fyyur.schema.show import ShowResponse
 from tests.mock import date_future, mock_artist, mock_show, mock_venue
@@ -22,8 +24,8 @@ def add_show(client, venue_id: int, artist_id: int, day_offset: int) -> Response
 
 def test_create_show_successful(app, client):
     with app.app_context():
-        venue = mock_venue(100).to_orm()
-        artist = mock_artist(200).to_orm()
+        venue = mock_venue(100).to_orm(Venue)
+        artist = mock_artist(200).to_orm(Artist)
         db.session.add(venue)
         db.session.add(artist)
         db.session.commit()

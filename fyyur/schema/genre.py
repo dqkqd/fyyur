@@ -3,7 +3,6 @@ from typing import Self
 
 from pydantic import field_serializer
 
-from fyyur.models.genre import Genre
 from fyyur.schema.base import BaseSchema
 
 
@@ -32,9 +31,6 @@ class GenreEnum(Enum):
 class GenreInDb(BaseSchema):
     id: int | None = None
     name: GenreEnum
-
-    def to_orm(self) -> Genre:
-        return self.to_orm_base(Genre)
 
     @field_serializer("name", return_type=str)
     def serialize_name(self, name: GenreEnum) -> str:

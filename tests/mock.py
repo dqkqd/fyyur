@@ -27,7 +27,7 @@ def mock_venue(id: int, name: str | None = None) -> VenueInDb:
 
 
 def mock_venues_db() -> list[Venue]:
-    return [mock_venue(id).to_orm() for id in range(1, 4)]
+    return [mock_venue(id).to_orm(Venue) for id in range(1, 4)]
 
 
 def mock_artist(
@@ -63,7 +63,7 @@ def mock_artist(
 
 
 def mock_artists_db() -> list[Artist]:
-    return [mock_artist(id).to_orm() for id in range(1, 5)]
+    return [mock_artist(id).to_orm(Artist) for id in range(1, 5)]
 
 
 def mock_show(
@@ -75,11 +75,11 @@ def mock_show(
 
 def mock_shows_db() -> list[Show]:
     return [
-        mock_show(id=1, venue_id=1, artist_id=1, day_offset=1).to_orm(),
-        mock_show(id=2, venue_id=1, artist_id=1, day_offset=2).to_orm(),
-        mock_show(id=3, venue_id=2, artist_id=2, day_offset=3).to_orm(),
-        mock_show(id=4, venue_id=1, artist_id=3, day_offset=4).to_orm(),
-        mock_show(id=5, venue_id=2, artist_id=4, day_offset=-4).to_orm(),
+        mock_show(id=1, venue_id=1, artist_id=1, day_offset=1).to_orm(Show),
+        mock_show(id=2, venue_id=1, artist_id=1, day_offset=2).to_orm(Show),
+        mock_show(id=3, venue_id=2, artist_id=2, day_offset=3).to_orm(Show),
+        mock_show(id=4, venue_id=1, artist_id=3, day_offset=4).to_orm(Show),
+        mock_show(id=5, venue_id=2, artist_id=4, day_offset=-4).to_orm(Show),
     ]
 
 
@@ -89,11 +89,11 @@ def mock_genre(id: int | None, genre: GenreEnum) -> GenreInDb:
 
 def mock_genres_db() -> list[Genre]:
     return [
-        mock_genre(1, GenreEnum.Blues).to_orm(),
-        mock_genre(2, GenreEnum.HipHop).to_orm(),
-        mock_genre(3, GenreEnum.Jazz).to_orm(),
-        mock_genre(4, GenreEnum.RockNRoll).to_orm(),
-        mock_genre(5, GenreEnum.Pop).to_orm(),
+        mock_genre(1, GenreEnum.Blues).to_orm(Genre),
+        mock_genre(2, GenreEnum.HipHop).to_orm(Genre),
+        mock_genre(3, GenreEnum.Jazz).to_orm(Genre),
+        mock_genre(4, GenreEnum.RockNRoll).to_orm(Genre),
+        mock_genre(5, GenreEnum.Pop).to_orm(Genre),
     ]
 
 

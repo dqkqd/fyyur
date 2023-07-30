@@ -13,9 +13,6 @@ from fyyur.schema.show import ShowInArtistInfo, ShowInDb
 class ArtistBase(BaseSchema):
     name: str | None = None
 
-    def to_orm(self) -> Artist:
-        return self.to_orm_base(Artist)
-
 
 class ArtistSearchResponse(ArtistBase):
     num_upcoming_shows: int = 0

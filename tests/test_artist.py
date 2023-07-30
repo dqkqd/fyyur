@@ -3,6 +3,7 @@ from typing import Any
 import pytest
 
 from fyyur.models import db
+from fyyur.models.artist import Artist
 from fyyur.models.show import Show
 from fyyur.routes.artist import find_artists, get_artist_info, get_artists
 from fyyur.schema.artist import (
@@ -58,7 +59,7 @@ def test_basic_find_artists(
 
 def test_find_artists_case_insensitive(app):
     with app.app_context():
-        db.session.add(mock_artist(id=10, name="King").to_orm())
+        db.session.add(mock_artist(id=10, name="King").to_orm(Artist))
         db.session.commit()
         find_artists(SearchSchema(search_term="k")) == ArtistSearchResponse(
             id=10, name="King", num_upcoming_shows=0
@@ -73,9 +74,9 @@ def test_find_artists_case_insensitive(app):
 
 def test_find_artists_with_past_shows(app):
     with app.app_context():
-        db.session.add(mock_artist(id=10, name="King").to_orm())
-        db.session.add(mock_show(venue_id=1, artist_id=1, day_offset=-10).to_orm())
-        db.session.add(mock_show(venue_id=1, artist_id=1, day_offset=10).to_orm())
+        db.session.add(mock_artist(id=10, name="King").to_orm(Artist))
+        db.session.add(mock_show(venue_id=1, artist_id=1, day_offset=-10).to_orm(Show))
+        db.session.add(mock_show(venue_id=1, artist_id=1, day_offset=10).to_orm(Show))
         db.session.commit()
         find_artists(SearchSchema(search_term="King")) == ArtistSearchResponse(
             id=10, name="King", num_upcoming_shows=1

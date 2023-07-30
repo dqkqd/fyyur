@@ -87,7 +87,7 @@ def insert_show(form: ShowForm) -> bool:
             flash("Show existed", "error")
             return False
 
-        db.session.add(show_schema.to_orm())
+        db.session.add(show_schema.to_orm(Show))
         db.session.commit()
 
     except ValidationError as e:
