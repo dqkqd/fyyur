@@ -3,7 +3,7 @@ from typing import Self
 
 from pydantic import field_serializer
 
-from fyyur.model import Genre
+from fyyur.models.genre import Genre
 from fyyur.schema.base import BaseSchema
 
 

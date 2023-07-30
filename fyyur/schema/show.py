@@ -3,7 +3,7 @@ from typing import Self
 
 from pydantic import HttpUrl, field_serializer
 
-from fyyur.model import Show
+from fyyur.models.show import Show
 from fyyur.schema.base import BaseSchema
 
 

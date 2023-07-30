@@ -3,7 +3,8 @@ from typing import Self
 
 from pydantic import HttpUrl, field_serializer
 
-from fyyur.model import Artist, Show
+from fyyur.models.artist import Artist
+from fyyur.models.show import Show
 from fyyur.schema.base import BaseSchema, State
 from fyyur.schema.genre import GenreEnum, GenreInDb
 from fyyur.schema.show import ShowInArtistInfo, ShowInDb

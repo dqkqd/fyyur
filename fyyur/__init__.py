@@ -37,7 +37,7 @@ def create_app(config_object=NormalConfig):
     app.config.from_object(config_object)
     app.jinja_env.filters["datetime"] = format_datetime
 
-    from fyyur.model import db, migrate
+    from fyyur.models import db, migrate
 
     db.init_app(app)
     migrate.init_app(app, db)

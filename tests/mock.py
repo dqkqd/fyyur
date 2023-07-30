@@ -1,7 +1,11 @@
 from datetime import datetime, timedelta
 
 from fyyur.constant import DATETIME_FORMAT
-from fyyur.model import Artist, Genre, Show, Venue, db
+from fyyur.models import db
+from fyyur.models.artist import Artist
+from fyyur.models.genre import Genre
+from fyyur.models.show import Show
+from fyyur.models.venue import Venue
 from fyyur.schema.artist import ArtistInDb
 from fyyur.schema.genre import GenreEnum, GenreInDb
 from fyyur.schema.show import ShowInDb

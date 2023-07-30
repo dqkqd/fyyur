@@ -1,7 +1,8 @@
 import pytest
 from flask import Response
 
-from fyyur.model import Show, db
+from fyyur.models import db
+from fyyur.models.show import Show
 from fyyur.routes.show import get_shows
 from fyyur.schema.show import ShowResponse
 from tests.mock import date_future, mock_artist, mock_show, mock_venue

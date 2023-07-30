@@ -1,4 +1,4 @@
-from fyyur.model import Venue
+from fyyur.models.venue import Venue
 from fyyur.schema.base import BaseSchema
 from fyyur.schema.show import ShowInDb
 

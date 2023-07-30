@@ -4,7 +4,7 @@ import pytest
 
 from fyyur import create_app
 from fyyur.config import TestingConfig
-from fyyur.model import db
+from fyyur.models import db
 from tests.mock import insert_mock_data
 
 

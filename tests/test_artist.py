@@ -2,7 +2,8 @@ from typing import Any
 
 import pytest
 
-from fyyur.model import Show, db
+from fyyur.models import db
+from fyyur.models.show import Show
 from fyyur.routes.artist import find_artists, get_artist_info, get_artists
 from fyyur.schema.artist import (
     ArtistBase,
