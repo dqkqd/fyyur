@@ -13,7 +13,6 @@ from fyyur.schema.artist import (
 )
 from fyyur.schema.base import SearchSchema
 from fyyur.schema.genre import GenreEnum
-from fyyur.schema.show import ShowInArtistInfo
 from tests.mock import date_future, mock_artist, mock_artists_db, mock_genre, mock_show
 
 
@@ -122,8 +121,10 @@ def test_get_artist_info(app, artist_id: int, genres: list[GenreEnum]):
         expected_artist_info = ArtistInfoResponse(
             **artist.model_dump(exclude=["shows", "genres"]),
             genres=genres,
-            past_shows=list(map(ShowInArtistInfo.from_show, past_shows)),
-            upcoming_shows=list(map(ShowInArtistInfo.from_show, upcoming_shows)),
+            past_shows=list(map(lambda show: show.to_show_in_artist_info(), past_shows)),
+            upcoming_shows=list(
+                map(lambda show: show.to_show_in_artist_info(), upcoming_shows)
+            ),
             past_shows_count=len(past_shows),
             upcoming_shows_count=len(upcoming_shows),
         )

@@ -44,12 +44,9 @@ def create_show_submission():
 
 def get_shows() -> list[ShowResponse]:
     """Seperate `get_shows` so we can test this behavior"""
-    shows_response = []
     with current_app.app_context():
-        shows = Show.query.all()
-        for show in shows:
-            shows_response.append(ShowResponse.from_show(show))
-    return shows_response
+        shows = list(map(lambda show: show.to_show_response(), Show.query.all()))
+    return shows
 
 
 def insert_show(form: ShowForm) -> bool:

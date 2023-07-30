@@ -1,9 +1,7 @@
 from datetime import datetime
-from typing import Self
 
 from pydantic import HttpUrl, field_serializer
 
-from fyyur.models.show import Show
 from fyyur.schema.base import BaseSchema
 
 
@@ -26,17 +24,6 @@ class ShowResponse(ShowBase):
     def serialize_url(self, url: HttpUrl) -> str:
         return str(url)
 
-    @classmethod
-    def from_show(cls, show: Show) -> Self:
-        return cls(
-            venue_id=show.venue_id,
-            artist_id=show.artist_id,
-            start_time=show.start_time,
-            venue_name=show.venue.name,
-            artist_name=show.artist.name,
-            artist_image_link=show.artist.image_link,
-        )
-
 
 class ShowInArtistInfo(BaseSchema):
     venue_id: int
@@ -44,11 +31,6 @@ class ShowInArtistInfo(BaseSchema):
     venue_image_link: HttpUrl
     start_time: datetime
 
-    @classmethod
-    def from_show(cls, show: Show) -> Self:
-        return cls(
-            venue_id=show.venue_id,
-            venue_name=show.venue.name,
-            venue_image_link=show.venue.image_link,
-            start_time=show.start_time,
-        )
+    @field_serializer("venue_image_link")
+    def serialize_url(self, url: HttpUrl) -> str:
+        return str(url)

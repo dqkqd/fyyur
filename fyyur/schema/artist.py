@@ -81,9 +81,14 @@ class ArtistInfoResponse(ArtistBasicInfoBase):
         def is_future(show: Show) -> bool:
             return not is_past(show)
 
-        past_shows = list(map(ShowInArtistInfo.from_show, filter(is_past, artist.shows)))
+        past_shows = list(
+            map(lambda show: show.to_show_in_artist_info(), filter(is_past, artist.shows))
+        )
         upcoming_shows = list(
-            map(ShowInArtistInfo.from_show, filter(is_future, artist.shows))
+            map(
+                lambda show: show.to_show_in_artist_info(),
+                filter(is_future, artist.shows),
+            )
         )
 
         return cls(
