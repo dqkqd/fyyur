@@ -8,7 +8,6 @@ from fyyur.models import Artist, Show, db
 from fyyur.routes.artist import find_artists, get_artist_info, get_artists
 from fyyur.schema.artist import (
     ArtistBase,
-    ArtistInfoResponse,
     ArtistSearchResponse,
 )
 from fyyur.schema.base import SearchSchema
@@ -88,23 +87,9 @@ def test_find_artists_with_past_shows(app: Flask) -> None:
 @pytest.mark.parametrize(
     "artist_id, genres",
     [
-        (
-            1,
-            [
-                mock_genre(1, GenreEnum.Blues),
-                mock_genre(2, GenreEnum.HipHop),
-                mock_genre(3, GenreEnum.Jazz),
-            ],
-        ),
-        (
-            2,
-            [
-                mock_genre(3, GenreEnum.Jazz),
-                mock_genre(4, GenreEnum.RockNRoll),
-                mock_genre(5, GenreEnum.Pop),
-            ],
-        ),
-        (3, [mock_genre(5, GenreEnum.Pop)]),
+        (1, [GenreEnum.Blues, GenreEnum.HipHop, GenreEnum.Jazz]),
+        (2, [GenreEnum.Jazz, GenreEnum.RockNRoll, GenreEnum.Pop]),
+        (3, [GenreEnum.Pop]),
         (4, []),
     ],
 )
@@ -121,17 +106,20 @@ def test_get_artist_info(app: Flask, artist_id: int, genres: list[GenreEnum]) ->
             .filter(Show.start_time < date_future(days=0))
             .all()
         )
-        expected_artist_info = ArtistInfoResponse(
-            **artist.model_dump(exclude={"shows", "genres"}),
-            genres=genres,
-            past_shows=[show.show_in_artist_info for show in past_shows],
-            upcoming_shows=[show.show_in_artist_info for show in upcoming_shows],
-            past_shows_count=len(past_shows),
-            upcoming_shows_count=len(upcoming_shows),
+        expected_artist_info_response = artist.to_orm(
+            Artist
+        ).artist_info_response.model_copy(
+            update=dict(
+                genres=genres,
+                past_shows=[show.show_in_artist_info for show in past_shows],
+                upcoming_shows=[show.show_in_artist_info for show in upcoming_shows],
+                past_shows_count=len(past_shows),
+                upcoming_shows_count=len(upcoming_shows),
+            ),
         )
 
-        artist_info = get_artist_info(artist_id=artist_id)
-        assert expected_artist_info == artist_info
+        artist_info_response = get_artist_info(artist_id=artist_id)
+        assert expected_artist_info_response == artist_info_response
 
 
 def test_show_artist(client: FlaskClient) -> None:

@@ -11,8 +11,10 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from fyyur.schema.artist import (
     ArtistInfo,
     ArtistInfoResponse,
+    ArtistInForm,
     ArtistSearchResponse,
 )
+from fyyur.schema.genre import GenreBase
 from fyyur.schema.show import ShowBase, ShowInArtistInfo, ShowInDb, ShowResponse
 
 db = SQLAlchemy()
@@ -116,9 +118,16 @@ class Artist(db.Model):  # type: ignore
         return ArtistInfo.model_validate(self)
 
     @property
+    def artist_in_form(self) -> ArtistInForm:
+        genres = [genre.genre_base for genre in self.genres]
+        return ArtistInForm(
+            **self.artist_info.model_dump(), genres=[genre.name for genre in genres]
+        )
+
+    @property
     def artist_info_response(self) -> ArtistInfoResponse:
         return ArtistInfoResponse(
-            **self.artist_info.model_dump(),
+            **self.artist_in_form.model_dump(),
             upcoming_shows=[show.show_in_artist_info for show in self.upcoming_shows],
             past_shows=[show.show_in_artist_info for show in self.past_shows],
             upcoming_shows_count=self.upcoming_shows_count,
@@ -147,6 +156,10 @@ class Genre(db.Model):  # type: ignore
         backref=db.backref("Genre", lazy=True),
         viewonly=True,
     )
+
+    @property
+    def genre_base(self) -> GenreBase:
+        return GenreBase.model_validate(self)
 
 
 class Show(db.Model):  # type: ignore
