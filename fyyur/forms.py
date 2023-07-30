@@ -1,10 +1,10 @@
 from datetime import datetime
 from enum import Enum
-from typing import Any, Callable, Union
+from typing import Any, Callable
 
 import phonenumbers
 from flask_wtf import FlaskForm
-from phonenumbers import PhoneNumber, geocoder
+from phonenumbers import PhoneNumber
 from wtforms import (
     BooleanField,
     DateTimeField,
@@ -42,21 +42,15 @@ class PhoneValidator:
     def _parse(number: str) -> PhoneNumber | None:
         for region in ["US", None]:
             phone_number = phonenumbers.parse(number, region)
-            if phonenumbers.is_valid_number(phone_number):
+            if phonenumbers.is_possible_number(phone_number):
                 return phone_number
         return None
 
-    def __call__(self, form: Union["VenueForm", "ArtistForm"], field):
+    def __call__(self, form, field):
         message = "Phone number is invalid."
         phone_number = PhoneValidator._parse(field.data)
         if phone_number is None:
             raise ValidationError(message)
-
-        state = form.state.data
-        if state:
-            description = geocoder.description_for_valid_number(phone_number, "en")
-            if not description.endswith(state):
-                raise ValidationError(message)
 
 
 class ShowForm(FlaskForm):
@@ -80,7 +74,7 @@ class ArtistVenueBaseForm(FlaskForm):
         coerce=ConverterMixin.coerce(State),
     )
     phone = StringField("phone", validators=[PhoneValidator()])
-    image_link = StringField("image_link")
+    image_link = StringField("image_link", validators=[URL()])
     genres = SelectMultipleField(
         "genres",
         validators=[DataRequired()],
@@ -89,7 +83,7 @@ class ArtistVenueBaseForm(FlaskForm):
     )
     facebook_link = StringField("facebook_link", validators=[URL()])
 
-    website_link = StringField("website_link")
+    website_link = StringField("website_link", validators=[URL()])
 
     seeking_description = StringField("seeking_description")
 
