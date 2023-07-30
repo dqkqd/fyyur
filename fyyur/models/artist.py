@@ -1,26 +1,35 @@
+from typing import TYPE_CHECKING
+
+import sqlalchemy as sa
+from sqlalchemy.orm import Mapped
+
 from fyyur.models import db
 from fyyur.models.reference import artist_genre
+
+if TYPE_CHECKING:
+    from fyyur.models.genre import Genre
+    from fyyur.models.show import Show
 
 
 class Artist(db.Model):
     __tablename__ = "Artist"
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
+    id = sa.Column(sa.Integer, primary_key=True)
+    name = sa.Column(sa.String)
+    city = sa.Column(sa.String(120))
+    state = sa.Column(sa.String(120))
+    phone = sa.Column(sa.String(120))
 
-    image_link = db.Column(db.String(500), nullable=True)
-    facebook_link = db.Column(db.String(120), nullable=True)
-    website_link = db.Column(db.String(120), nullable=True)
+    image_link = sa.Column(sa.String(500), nullable=True)
+    facebook_link = sa.Column(sa.String(120), nullable=True)
+    website_link = sa.Column(sa.String(120), nullable=True)
 
-    seeking_venue = db.Column(db.Boolean, default=False)
-    seeking_description = db.Column(db.String)
+    seeking_venue = sa.Column(sa.Boolean, default=False)
+    seeking_description = sa.Column(sa.String)
 
-    shows = db.relationship("Show", backref="Artist", lazy=True)
+    shows: Mapped[list["Show"]] = db.relationship("Show", backref="Artist", lazy=True)
 
-    genres = db.relationship(
+    genres: Mapped[list["Genre"]] = db.relationship(
         "Genre",
         secondary=artist_genre,
         lazy="subquery",
