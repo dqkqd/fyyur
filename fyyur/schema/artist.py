@@ -10,17 +10,25 @@ from fyyur.schema.show import ShowInArtistInfo, ShowInDb
 
 
 class ArtistBase(BaseSchema):
-    id: int
+    name: str | None = None
 
     def to_orm(self) -> Artist:
         return self.to_orm_base(Artist)
 
 
-class ArtistWithName(ArtistBase):
-    name: str | None = None
+class ArtistSearchResponse(ArtistBase):
+    num_upcoming_shows: int = 0
+
+    @classmethod
+    def from_artist(cls, artist: Artist) -> Self:
+        artist_search_response = cls.model_validate(artist)
+        artist_search_response.num_upcoming_shows = len(
+            [show for show in artist.shows if show.start_time >= datetime.now()]
+        )
+        return artist_search_response
 
 
-class ArtistInDbBase(ArtistWithName):
+class ArtistBasicInfo(ArtistBase):
     city: str | None = None
     state: State | None = None
     phone: str | None = None
@@ -45,23 +53,12 @@ class ArtistInDbBase(ArtistWithName):
         return state.value
 
 
-class ArtistInDb(ArtistInDbBase):
+class ArtistInDb(ArtistBasicInfo):
+    id: int
     shows: list[ShowInDb] = []
 
 
-class ArtistSearchResponse(ArtistWithName):
-    num_upcoming_shows: int = 0
-
-    @classmethod
-    def from_artist(cls, artist: Artist) -> Self:
-        artist_search_response = cls.model_validate(artist)
-        artist_search_response.num_upcoming_shows = len(
-            [show for show in artist.shows if show.start_time >= datetime.now()]
-        )
-        return artist_search_response
-
-
-class ArtistInfoResponse(ArtistInDbBase):
+class ArtistInfoResponse(ArtistBasicInfo):
     past_shows: list[ShowInArtistInfo]
     upcoming_shows: list[ShowInArtistInfo]
     past_shows_count: int
@@ -69,7 +66,7 @@ class ArtistInfoResponse(ArtistInDbBase):
 
     @classmethod
     def from_artist(cls, artist: Artist) -> Self:
-        artist_in_db_base = ArtistInDbBase.model_validate(artist)
+        artist_in_db_base = ArtistBasicInfo.model_validate(artist)
 
         def is_past(show: Show) -> bool:
             return show.start_time < datetime.now()

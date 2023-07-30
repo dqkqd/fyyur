@@ -4,7 +4,11 @@ import pytest
 
 from fyyur.model import Show, db
 from fyyur.routes.artist import find_artists, get_artist_info, get_artists
-from fyyur.schema.artist import ArtistInfoResponse, ArtistSearchResponse, ArtistWithName
+from fyyur.schema.artist import (
+    ArtistBase,
+    ArtistInfoResponse,
+    ArtistSearchResponse,
+)
 from fyyur.schema.base import SearchSchema
 from fyyur.schema.genre import GenreEnum
 from fyyur.schema.show import ShowInArtistInfo
@@ -13,7 +17,7 @@ from tests.mock import date_future, mock_artist, mock_artists_db, mock_genre, mo
 
 def test_get_artists(app):
     with app.app_context():
-        artists = [ArtistWithName.model_validate(artist) for artist in mock_artists_db()]
+        artists = [ArtistBase.model_validate(artist) for artist in mock_artists_db()]
         all_artists = get_artists()
         assert artists == all_artists
 

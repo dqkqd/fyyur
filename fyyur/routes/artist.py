@@ -2,7 +2,12 @@ from flask import Blueprint, abort, flash, redirect, render_template, request, u
 
 from fyyur.forms import ArtistForm
 from fyyur.model import Artist
-from fyyur.schema.artist import ArtistInfoResponse, ArtistSearchResponse, ArtistWithName
+from fyyur.schema.artist import (
+    ArtistBase,
+    ArtistInDb,
+    ArtistInfoResponse,
+    ArtistSearchResponse,
+)
 from fyyur.schema.base import SearchSchema
 
 bp = Blueprint("artist", __name__, url_prefix="/artists")
@@ -93,10 +98,9 @@ def create_artist_submission():
     return render_template("pages/home.html")
 
 
-def get_artists() -> list[ArtistWithName]:
+def get_artists() -> list[ArtistBase]:
     return [
-        ArtistWithName.model_validate(artist)
-        for artist in Artist.query.order_by("id").all()
+        ArtistBase.model_validate(artist) for artist in Artist.query.order_by("id").all()
     ]
 
 
