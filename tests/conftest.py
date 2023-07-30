@@ -5,7 +5,12 @@ import pytest
 from fyyur import create_app
 from fyyur.config import TestingConfig
 from fyyur.model import db
-from tests.mock import mock_artists_db, mock_shows_db, mock_venues_db
+from tests.mock import (
+    mock_artists_db,
+    mock_genres_db,
+    mock_shows_db,
+    mock_venues_db,
+)
 
 
 @pytest.fixture()
@@ -22,6 +27,9 @@ def app():
             db.session.add(artist)
         for show in mock_shows_db():
             db.session.add(show)
+        for genre in mock_genres_db():
+            db.session.add(genre)
+
         db.session.commit()
 
     yield test_app

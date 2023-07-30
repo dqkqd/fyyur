@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta
 
 from fyyur.constant import DATETIME_FORMAT
-from fyyur.model import Artist, Show, Venue
+from fyyur.model import Artist, Genre, Show, Venue
 from fyyur.schema.artist import ArtistInDb
+from fyyur.schema.genre import GenreEnum, GenreInDb
 from fyyur.schema.show import ShowInDb
 from fyyur.schema.venue import VenueInDb
 
@@ -75,4 +76,18 @@ def mock_shows_db() -> list[Show]:
         mock_show(id=3, venue_id=2, artist_id=2, day_offset=3).to_orm(),
         mock_show(id=4, venue_id=1, artist_id=3, day_offset=4).to_orm(),
         mock_show(id=5, venue_id=2, artist_id=4, day_offset=-4).to_orm(),
+    ]
+
+
+def mock_genre(id: int, genre: GenreEnum) -> GenreInDb:
+    return GenreInDb(id=id, name=genre)
+
+
+def mock_genres_db() -> list[Genre]:
+    return [
+        mock_genre(1, GenreEnum.Blues).to_orm(),
+        mock_genre(2, GenreEnum.HipHop).to_orm(),
+        mock_genre(3, GenreEnum.Jazz).to_orm(),
+        mock_genre(4, GenreEnum.RockNRoll).to_orm(),
+        mock_genre(5, GenreEnum.Pop).to_orm(),
     ]
