@@ -9,6 +9,10 @@ class ArtistBase(BaseSchema):
     name: str | None = None
 
 
+class ArtistResponse(ArtistBase):
+    id: int
+
+
 class ArtistSearchResponse(ArtistBase):
     num_upcoming_shows: int = 0
 

@@ -4,9 +4,9 @@ from werkzeug.wrappers.response import Response as FlaskResponse
 from fyyur.forms import ArtistForm
 from fyyur.models import Artist
 from fyyur.schema.artist import (
-    ArtistBase,
     ArtistInDb,
     ArtistInfoResponse,
+    ArtistResponse,
     ArtistSearchResponse,
 )
 from fyyur.schema.base import SearchSchema
@@ -104,10 +104,9 @@ def create_artist_submission() -> FlaskResponse | str:
     return render_template("pages/home.html")
 
 
-def get_artists() -> list[ArtistBase]:
-    return [
-        ArtistBase.model_validate(artist) for artist in Artist.query.order_by("id").all()
-    ]
+def get_artists() -> list[ArtistResponse]:
+    artists: list[Artist] = Artist.query.order_by("id").all()
+    return [artist.artist_response for artist in artists]
 
 
 def find_artists(search: SearchSchema) -> list[ArtistSearchResponse]:
