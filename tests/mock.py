@@ -98,5 +98,19 @@ def insert_mock_data():
     artists = mock_artists_db()
     shows = mock_shows_db()
     genres = mock_genres_db()
+
+    # artist1: blues, hiphop, jazz
+    artists[0].genres.append(genres[0])
+    artists[0].genres.append(genres[1])
+    artists[0].genres.append(genres[2])
+
+    # artist2: jazz, rock n roll, pop
+    artists[1].genres.append(genres[2])
+    artists[1].genres.append(genres[3])
+    artists[1].genres.append(genres[4])
+
+    # artist3: pop
+    artists[2].genres.append(genres[4])
+
     for object in [*venues, *artists, *shows, *genres]:
         db.session.add(object)

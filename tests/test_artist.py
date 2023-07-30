@@ -6,8 +6,9 @@ from fyyur.model import Show, db
 from fyyur.routes.artist import find_artists, get_artist_info, get_artists
 from fyyur.schema.artist import ArtistInfoResponse, ArtistSearchResponse, ArtistWithName
 from fyyur.schema.base import SearchSchema
+from fyyur.schema.genre import GenreEnum
 from fyyur.schema.show import ShowInArtistInfo
-from tests.mock import date_future, mock_artist, mock_artists_db, mock_show
+from tests.mock import date_future, mock_artist, mock_artists_db, mock_genre, mock_show
 
 
 def test_get_artists(app):
@@ -76,10 +77,31 @@ def test_find_artists_with_past_shows(app):
         )
 
 
-@pytest.mark.parametrize("artist_id", [(1), (2), (3), (4)])
-def test_get_artist_info(app, artist_id: int):
+@pytest.mark.parametrize(
+    "artist_id, genres",
+    [
+        (
+            1,
+            [
+                mock_genre(1, GenreEnum.Blues),
+                mock_genre(2, GenreEnum.HipHop),
+                mock_genre(3, GenreEnum.Jazz),
+            ],
+        ),
+        (
+            2,
+            [
+                mock_genre(3, GenreEnum.Jazz),
+                mock_genre(4, GenreEnum.RockNRoll),
+                mock_genre(5, GenreEnum.Pop),
+            ],
+        ),
+        (3, [mock_genre(5, GenreEnum.Pop)]),
+        (4, []),
+    ],
+)
+def test_get_artist_info(app, artist_id: int, genres: list[GenreEnum]):
     artist = mock_artist(id=artist_id, seeking_venue=True)
-
     with app.app_context():
         upcoming_shows = (
             Show.query.filter_by(artist_id=artist_id)
@@ -92,7 +114,8 @@ def test_get_artist_info(app, artist_id: int):
             .all()
         )
         expected_artist_info = ArtistInfoResponse(
-            **artist.model_dump(exclude=["shows"]),
+            **artist.model_dump(exclude=["shows", "genres"]),
+            genres=genres,
             past_shows=list(map(ShowInArtistInfo.from_show, past_shows)),
             upcoming_shows=list(map(ShowInArtistInfo.from_show, upcoming_shows)),
             past_shows_count=len(past_shows),
