@@ -120,7 +120,8 @@ class Artist(db.Model):  # type: ignore
     @property
     def artist_search_response(self) -> ArtistSearchResponse:
         return ArtistSearchResponse(
-            name=self.name, num_upcoming_shows=self.upcoming_shows_count
+            **self.artist_response.model_dump(),
+            num_upcoming_shows=self.upcoming_shows_count,
         )
 
     @property

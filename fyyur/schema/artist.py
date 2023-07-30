@@ -13,7 +13,7 @@ class ArtistResponse(ArtistBase):
     id: int
 
 
-class ArtistSearchResponse(ArtistBase):
+class ArtistSearchResponse(ArtistResponse):
     num_upcoming_shows: int = 0
 
 

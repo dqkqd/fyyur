@@ -63,13 +63,13 @@ def test_find_artists_case_insensitive(app: Flask) -> None:
         db.session.add(mock_artist(id=10, name="King").to_orm(Artist))
         db.session.commit()
         find_artists(SearchSchema(search_term="k")) == ArtistSearchResponse(
-            name="King", num_upcoming_shows=0
+            id=10, name="King", num_upcoming_shows=0
         )
         find_artists(SearchSchema(search_term="K")) == ArtistSearchResponse(
-            name="King", num_upcoming_shows=0
+            id=10, name="King", num_upcoming_shows=0
         )
         find_artists(SearchSchema(search_term="IN")) == ArtistSearchResponse(
-            name="King", num_upcoming_shows=0
+            id=10, name="King", num_upcoming_shows=0
         )
 
 
@@ -80,7 +80,7 @@ def test_find_artists_with_past_shows(app: Flask) -> None:
         db.session.add(mock_show(venue_id=1, artist_id=1, day_offset=10).to_orm(Show))
         db.session.commit()
         find_artists(SearchSchema(search_term="King")) == ArtistSearchResponse(
-            name="King", num_upcoming_shows=1
+            id=10, name="King", num_upcoming_shows=1
         )
 
 
