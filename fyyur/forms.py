@@ -24,7 +24,7 @@ from fyyur.schema.genre import GenreEnum
 class ConverterMixin:
     @staticmethod
     def choices(enum_class: Enum) -> list[str]:
-        return [e.value for e in enum_class]
+        return [(e, e.value) for e in enum_class]
 
     @staticmethod
     def coerce(enum_class: Enum) -> Callable[[str], Enum]:
@@ -53,43 +53,65 @@ class PhoneValidator:
             raise ValidationError(message)
 
 
+class CustomDataRequiredValidator(DataRequired):
+    def __init__(self, field: str | None = None):
+        message = f"{field} is required." if field else None
+        super().__init__(message)
+
+
+class CustomURLValidator(URL):
+    def __init__(self, require_tld=True, field: str = None):
+        message = f"{field} : Invalid URL." if field else None
+        super().__init__(require_tld, message)
+
+
 class ShowForm(FlaskForm):
-    artist_id = IntegerField("artist_id", validators=[DataRequired()])
-    venue_id = IntegerField("venue_id", validators=[DataRequired()])
+    artist_id = IntegerField(
+        "artist_id", validators=[CustomDataRequiredValidator("Artist ID")]
+    )
+    venue_id = IntegerField(
+        "venue_id", validators=[CustomDataRequiredValidator("Venue ID")]
+    )
     start_time = DateTimeField(
         "start_time",
-        validators=[DataRequired()],
+        validators=[CustomDataRequiredValidator("Start Time")],
         default=datetime.today(),
         format=DATETIME_FORMAT,
     )
 
 
 class ArtistVenueBaseForm(FlaskForm):
-    name = StringField("name", validators=[DataRequired()])
-    city = StringField("city", validators=[DataRequired()])
+    name = StringField("name", validators=[CustomDataRequiredValidator("Artist Name")])
+    city = StringField("city", validators=[CustomDataRequiredValidator("City")])
     state = SelectField(
         "state",
-        validators=[DataRequired()],
+        validators=[CustomDataRequiredValidator("State")],
         choices=ConverterMixin.choices(State),
         coerce=ConverterMixin.coerce(State),
     )
     phone = StringField("phone", validators=[PhoneValidator()])
-    image_link = StringField("image_link", validators=[URL()])
+    image_link = StringField(
+        "image_link", validators=[CustomURLValidator(field="Image Link")]
+    )
     genres = SelectMultipleField(
         "genres",
-        validators=[DataRequired()],
+        validators=[CustomDataRequiredValidator("Genre")],
         choices=ConverterMixin.choices(GenreEnum),
         coerce=ConverterMixin.coerce(GenreEnum),
     )
-    facebook_link = StringField("facebook_link", validators=[URL()])
+    facebook_link = StringField(
+        "facebook_link", validators=[CustomURLValidator(field="Facebook Link")]
+    )
 
-    website_link = StringField("website_link", validators=[URL()])
+    website_link = StringField(
+        "website_link", validators=[CustomURLValidator(field="Website Link")]
+    )
 
     seeking_description = StringField("seeking_description")
 
 
 class VenueForm(ArtistVenueBaseForm):
-    address = StringField("address", validators=[DataRequired()])
+    address = StringField("address", validators=[CustomDataRequiredValidator("Address")])
     seeking_talent = BooleanField("seeking_talent")
 
 
