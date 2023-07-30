@@ -138,6 +138,7 @@ class Artist(db.Model):  # type: ignore
     @property
     def artist_info_response(self) -> ArtistInfoResponse:
         return ArtistInfoResponse(
+            id=self.id,
             **self.artist_in_form.model_dump(),
             upcoming_shows=[show.show_in_artist_info for show in self.upcoming_shows],
             past_shows=[show.show_in_artist_info for show in self.past_shows],

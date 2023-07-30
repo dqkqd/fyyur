@@ -51,6 +51,7 @@ class ArtistInDb(ArtistInfo):
 
 
 class ArtistInfoResponse(ArtistInForm):
+    id: int
     past_shows: list[ShowInArtistInfo]
     upcoming_shows: list[ShowInArtistInfo]
     past_shows_count: int
