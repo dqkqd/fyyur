@@ -17,7 +17,14 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["black", "pytest", "ruff"]
+dev = [
+    "black",
+    "mypy",
+    "pytest",
+    "ruff",
+    "sqlalchemy[mypy]",
+    "types-python-dateutil",
+]
 
 [tool.ruff]
 select = ["E", "F", "I"]
@@ -34,3 +41,9 @@ py-modules = []
 [tool.pytest.ini_options]
 filterwarnings = ["ignore: 'flask.Markup' is deprecated"]
 addopts = "-vvv"
+
+[tool.mypy]
+strict = true
+ignore_missing_imports = true
+plugins = ["sqlalchemy.ext.mypy.plugin", "pydantic.mypy"]
+exclude = [".venv/", "build/", "migrations/", "fabfile.py"]
