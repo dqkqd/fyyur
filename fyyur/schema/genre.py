@@ -28,8 +28,7 @@ class GenreEnum(StrEnum):
     Other = "Other"
 
 
-class GenreInDb(BaseSchema):
-    id: int | None = None
+class GenreBase(BaseSchema):
     name: GenreEnum
 
     @field_serializer("name", return_type=str)
@@ -43,3 +42,7 @@ class GenreInDb(BaseSchema):
     @classmethod
     def from_str(cls, name: str) -> Self:
         return cls(name=name)
+
+
+class GenreInDb(GenreBase):
+    id: int | None = None
