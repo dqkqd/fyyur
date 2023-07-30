@@ -1,7 +1,7 @@
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 
 from fyyur.forms import ArtistForm
-from fyyur.models.artist import Artist
+from fyyur.models import Artist
 from fyyur.schema.artist import (
     ArtistBase,
     ArtistInDb,

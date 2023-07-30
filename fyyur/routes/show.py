@@ -12,10 +12,7 @@ from pydantic import ValidationError
 from sqlalchemy import or_
 
 from fyyur.forms import ShowForm
-from fyyur.models import db
-from fyyur.models.artist import Artist
-from fyyur.models.show import Show
-from fyyur.models.venue import Venue
+from fyyur.models import Artist, Show, Venue, db
 from fyyur.schema.show import ShowInDb, ShowResponse
 
 bp = Blueprint("show", __name__, url_prefix="/shows")
