@@ -76,8 +76,8 @@ def test_find_artists_case_insensitive(app: Flask) -> None:
 def test_find_artists_with_past_shows(app: Flask) -> None:
     with app.app_context():
         db.session.add(mock_artist(id=10, name="King").to_orm(Artist))
-        db.session.add(mock_show(venue_id=1, artist_id=1, day_offset=-10).to_orm(Show))
-        db.session.add(mock_show(venue_id=1, artist_id=1, day_offset=10).to_orm(Show))
+        db.session.add(mock_show(venue_id=1, artist_id=10, day_offset=-10).to_orm(Show))
+        db.session.add(mock_show(venue_id=1, artist_id=10, day_offset=10).to_orm(Show))
         db.session.commit()
         find_artists(SearchSchema(search_term="King")) == ArtistSearchResponse(
             id=10, name="King", num_upcoming_shows=1
