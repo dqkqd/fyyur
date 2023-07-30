@@ -13,7 +13,7 @@ class ArtistSearchResponse(ArtistBase):
     num_upcoming_shows: int = 0
 
 
-class ArtistBasicInfoBase(ArtistBase):
+class ArtistInfo(ArtistBase):
     city: str | None = None
     state: State | None = None
     phone: str | None = None
@@ -36,23 +36,17 @@ class ArtistBasicInfoBase(ArtistBase):
         return state.value
 
 
-class ArtistBasicInfo(ArtistBasicInfoBase):
+class ArtistInForm(ArtistInfo):
     genres: list[GenreEnum] = []
 
 
-class ArtistInDb(ArtistBasicInfoBase):
+class ArtistInDb(ArtistInfo):
     id: int
     shows: list[ShowInDb] = []
     genres: list[GenreInDb] = []
 
-    def to_artist_basic_info(self) -> ArtistBasicInfo:
-        return ArtistBasicInfo(
-            **self.model_dump(exclude={"id", "shows", "genres"}),
-            genres=[GenreEnum(genre.name) for genre in self.genres]
-        )
 
-
-class ArtistInfoResponse(ArtistBasicInfoBase):
+class ArtistInfoResponse(ArtistInfo):
     past_shows: list[ShowInArtistInfo]
     upcoming_shows: list[ShowInArtistInfo]
     past_shows_count: int

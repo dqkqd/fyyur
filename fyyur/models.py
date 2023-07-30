@@ -9,7 +9,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from fyyur.schema.artist import (
-    ArtistBasicInfoBase,
+    ArtistInfo,
     ArtistInfoResponse,
     ArtistSearchResponse,
 )
@@ -112,13 +112,13 @@ class Artist(db.Model):  # type: ignore
         )
 
     @property
-    def artist_basic_info_base(self) -> ArtistBasicInfoBase:
-        return ArtistBasicInfoBase.model_validate(self)
+    def artist_info(self) -> ArtistInfo:
+        return ArtistInfo.model_validate(self)
 
     @property
     def artist_info_response(self) -> ArtistInfoResponse:
         return ArtistInfoResponse(
-            **self.artist_basic_info_base.model_dump(),
+            **self.artist_info.model_dump(),
             upcoming_shows=[show.show_in_artist_info for show in self.upcoming_shows],
             past_shows=[show.show_in_artist_info for show in self.past_shows],
             upcoming_shows_count=self.upcoming_shows_count,
