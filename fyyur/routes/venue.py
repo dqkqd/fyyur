@@ -1,4 +1,5 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
+from werkzeug.wrappers.response import Response as FlaskResponse
 
 from fyyur.forms import VenueForm
 
@@ -6,7 +7,7 @@ bp = Blueprint("venue", __name__, url_prefix="/venues")
 
 
 @bp.route("/")
-def venues():
+def venues() -> str:
     # TODO: replace with real venues data.
     #       num_upcoming_shows should be aggregated based on number of upcoming shows per venue.
     data = [
@@ -42,7 +43,7 @@ def venues():
 
 
 @bp.route("/search", methods=["POST"])
-def search_venues():
+def search_venues() -> str:
     # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
     # seach for Hop should return "The Musical Hop".
     # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
@@ -64,7 +65,7 @@ def search_venues():
 
 
 @bp.route("/<int:venue_id>")
-def show_venue(venue_id):
+def show_venue(venue_id: int) -> str:
     # shows the venue page with the given venue_id
     # TODO: replace with real venue data from the venues table, using venue_id
     data1 = {
@@ -161,13 +162,13 @@ def show_venue(venue_id):
 
 
 @bp.route("/create", methods=["GET"])
-def create_venue_form():
+def create_venue_form() -> str:
     form = VenueForm()
     return render_template("forms/new_venue.html", form=form)
 
 
 @bp.route("/create", methods=["POST"])
-def create_venue_submission():
+def create_venue_submission() -> str:
     # TODO: insert form data as a new Venue record in the db, instead
     # TODO: modify data to be the data object returned from db insertion
 
@@ -180,17 +181,17 @@ def create_venue_submission():
 
 
 @bp.route("/<venue_id>", methods=["DELETE"])
-def delete_venue(venue_id):
+def delete_venue(venue_id: int) -> str:
     # TODO: Complete this endpoint for taking a venue_id, and using
     # SQLAlchemy ORM to delete a record. Handle cases where the session commit could fail.
 
     # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
     # clicking that button delete it from the db then redirect the user to the homepage
-    return None
+    raise NotImplementedError
 
 
 @bp.route("/<int:venue_id>/edit", methods=["GET"])
-def edit_venue(venue_id):
+def edit_venue(venue_id: int) -> str:
     form = VenueForm()
     venue = {
         "id": 1,
@@ -211,7 +212,7 @@ def edit_venue(venue_id):
 
 
 @bp.route("/<int:venue_id>/edit", methods=["POST"])
-def edit_venue_submission(venue_id):
+def edit_venue_submission(venue_id: int) -> FlaskResponse | str:
     # TODO: take values from the form submitted, and update existing
     # venue record with ID <venue_id> using the new attributes
     return redirect(url_for("show_venue", venue_id=venue_id))

@@ -1,13 +1,18 @@
-from enum import Enum
+from enum import StrEnum
+from typing import TYPE_CHECKING, TypeVar, Union
 
 from pydantic import BaseModel, ConfigDict
-from sqlalchemy.orm import DeclarativeBase
+
+if TYPE_CHECKING:
+    from fyyur.models import Artist, Genre, Show, Venue
+
+DbModel = TypeVar("DbModel", bound=Union["Venue", "Artist", "Show", "Genre"])
 
 
 class BaseSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    def to_orm(self, orm_class: type[DeclarativeBase]) -> DeclarativeBase:
+    def to_orm(self, orm_class: type[DbModel]) -> DbModel:
         return orm_class(**self.model_dump())
 
 
@@ -15,7 +20,7 @@ class SearchSchema(BaseModel):
     search_term: str = ""
 
 
-class State(Enum):
+class State(StrEnum):
     AL = "AL"
     AK = "AK"
     AZ = "AZ"

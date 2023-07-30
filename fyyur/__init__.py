@@ -1,25 +1,26 @@
 import logging
 from logging import FileHandler, Formatter
+from typing import Any
 
 import babel
 import dateutil.parser
 from flask import Flask, render_template
 from flask_moment import Moment
 
-from fyyur.config import NormalConfig
+from fyyur.config import Config, NormalConfig
 
 # ----------------------------------------------------------------------------#
 # Filters.
 # ----------------------------------------------------------------------------#
 
 
-def format_datetime(value, format="medium"):
+def format_datetime(value, format="medium"):  # type: ignore
     date = dateutil.parser.parse(value)
     if format == "full":
         format = "EEEE MMMM, d, y 'at' h:mma"
     elif format == "medium":
         format = "EE MM, dd, y h:mma"
-    return babel.dates.format_datetime(date, format, locale="en")
+    return babel.dates.format_datetime(date, format, locale="en")  # type: ignore
 
 
 # ----------------------------------------------------------------------------#
@@ -27,7 +28,7 @@ def format_datetime(value, format="medium"):
 # ----------------------------------------------------------------------------#
 
 
-def create_app(config_object=NormalConfig):
+def create_app(config_object: type[Config] = NormalConfig) -> Flask:
     # ----------------------------------------------------------------------------#
     # App Config.
     # ----------------------------------------------------------------------------#
@@ -49,15 +50,15 @@ def create_app(config_object=NormalConfig):
     app.register_blueprint(show.bp)
 
     @app.route("/")
-    def index():
+    def index() -> str:
         return render_template("pages/home.html")
 
     @app.errorhandler(404)
-    def not_found_error(error):
+    def not_found_error(error: Any) -> tuple[str, int]:
         return render_template("errors/404.html"), 404
 
     @app.errorhandler(500)
-    def server_error(error):
+    def server_error(error: Any) -> tuple[str, int]:
         return render_template("errors/500.html"), 500
 
     if not app.debug:

@@ -8,11 +8,11 @@ from fyyur.schema.show import ShowInDb
 from fyyur.schema.venue import VenueInDb
 
 
-def date_future(days: int = 1) -> datetime:
+def date_future(days: int = 1) -> str:
     return (datetime.now() + timedelta(days=days)).strftime(DATETIME_FORMAT)
 
 
-def date_past(days: int = 1) -> datetime:
+def date_past(days: int = 1) -> str:
     return (datetime.now() - timedelta(days=days)).strftime(DATETIME_FORMAT)
 
 
@@ -28,8 +28,8 @@ def mock_venues_db() -> list[Venue]:
 
 def mock_artist(
     id: int,
-    name: str = None,
-    seeking_venue: str = True,
+    name: str | None = None,
+    seeking_venue: bool = True,
 ) -> ArtistInDb:
     name = name if name is not None else f"Artist{id}"
 
@@ -93,7 +93,7 @@ def mock_genres_db() -> list[Genre]:
     ]
 
 
-def insert_mock_data():
+def insert_mock_data() -> None:
     venues = mock_venues_db()
     artists = mock_artists_db()
     shows = mock_shows_db()

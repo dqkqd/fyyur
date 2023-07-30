@@ -10,6 +10,7 @@ from flask import (
 )
 from pydantic import ValidationError
 from sqlalchemy import or_
+from werkzeug.wrappers.response import Response as FlaskResponse
 
 from fyyur.forms import ShowForm
 from fyyur.models import Artist, Show, Venue, db
@@ -19,20 +20,20 @@ bp = Blueprint("show", __name__, url_prefix="/shows")
 
 
 @bp.route("/")
-def shows():
+def shows() -> str:
     data = [show.model_dump(mode="json") for show in get_shows()]
     return render_template("pages/shows.html", shows=data)
 
 
 @bp.route("/create")
-def create_shows():
+def create_shows() -> str:
     # renders form. do not touch.
     form = ShowForm()
     return render_template("forms/new_show.html", form=form)
 
 
 @bp.route("/create", methods=["POST"])
-def create_show_submission():
+def create_show_submission() -> FlaskResponse | str:
     form = ShowForm()
     if insert_show(form):
         return render_template("pages/home.html")
@@ -85,7 +86,7 @@ def insert_show(form: ShowForm) -> bool:
         db.session.commit()
 
     except ValidationError as e:
-        flash(e, "error")
+        flash(f"{e}", "error")
         return False
 
     flash("Show was successfully listed!", "info")

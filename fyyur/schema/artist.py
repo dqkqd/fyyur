@@ -47,8 +47,8 @@ class ArtistInDb(ArtistBasicInfoBase):
 
     def to_artist_basic_info(self) -> ArtistBasicInfo:
         return ArtistBasicInfo(
-            **self.model_dump(exclude=["id", "shows", "genres"]),
-            genres=[genre.name.value for genre in self.genres]
+            **self.model_dump(exclude={"id", "shows", "genres"}),
+            genres=[GenreEnum(genre.name) for genre in self.genres]
         )
 
 

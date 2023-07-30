@@ -1,6 +1,9 @@
 import os
+from typing import Iterator
 
 import pytest
+from flask import Flask
+from flask.testing import FlaskClient
 
 from fyyur import create_app
 from fyyur.config import TestingConfig
@@ -9,7 +12,7 @@ from tests.mock import insert_mock_data
 
 
 @pytest.fixture()
-def app():
+def app() -> Iterator[Flask]:
     test_app = create_app(TestingConfig)
     os.remove(test_app.config["TEST_DB_PATH"])
 
@@ -26,5 +29,5 @@ def app():
 
 
 @pytest.fixture()
-def client(app):
+def client(app: Flask) -> FlaskClient:
     return app.test_client()

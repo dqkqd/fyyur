@@ -1,4 +1,5 @@
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
+from werkzeug.wrappers.response import Response as FlaskResponse
 
 from fyyur.forms import ArtistForm
 from fyyur.models import Artist
@@ -14,13 +15,13 @@ bp = Blueprint("artist", __name__, url_prefix="/artists")
 
 
 @bp.route("/")
-def artists():
+def artists() -> str:
     data = [artist.model_dump(mode="json") for artist in get_artists()]
     return render_template("pages/artists.html", artists=data)
 
 
 @bp.route("/search", methods=["POST"])
-def search_artists():
+def search_artists() -> str:
     search_schema = SearchSchema(**request.form)
     data = [artist.model_dump(mode="json") for artist in find_artists(search_schema)]
     response = {
@@ -36,7 +37,7 @@ def search_artists():
 
 
 @bp.route("/<int:artist_id>")
-def show_artist(artist_id: int):
+def show_artist(artist_id: int) -> str:
     artist = get_artist_info(artist_id)
     if artist is None:
         abort(404)
@@ -48,7 +49,7 @@ def show_artist(artist_id: int):
 #  Update
 #  ----------------------------------------------------------------
 @bp.route("/<int:artist_id>/edit", methods=["GET"])
-def edit_artist(artist_id):
+def edit_artist(artist_id: int) -> str:
     form = ArtistForm()
     artist = {
         "id": 4,
@@ -68,7 +69,7 @@ def edit_artist(artist_id):
 
 
 @bp.route("/<int:artist_id>/edit", methods=["POST"])
-def edit_artist_submission(artist_id):
+def edit_artist_submission(artist_id: int) -> FlaskResponse:
     # TODO: take values from the form submitted, and update existing
     # artist record with ID <artist_id> using the new attributes
 
@@ -80,13 +81,13 @@ def edit_artist_submission(artist_id):
 
 
 @bp.route("/create", methods=["GET"])
-def create_artist_form():
+def create_artist_form() -> str:
     form = ArtistForm()
     return render_template("forms/new_artist.html", form=form)
 
 
 @bp.route("/create", methods=["POST"])
-def create_artist_submission():
+def create_artist_submission() -> FlaskResponse | str:
     # called upon submitting the new artist listing form
     # TODO: insert form data as a new Venue record in the db, instead
     # TODO: modify data to be the data object returned from db insertion
@@ -117,7 +118,7 @@ def find_artists(search: SearchSchema) -> list[ArtistSearchResponse]:
 
 
 def get_artist_info(artist_id: int) -> ArtistInfoResponse | None:
-    artist = Artist.query.filter_by(id=artist_id).first()
+    artist: Artist = Artist.query.filter_by(id=artist_id).first()
     if artist is None:
         return None
     return artist.to_info_response()

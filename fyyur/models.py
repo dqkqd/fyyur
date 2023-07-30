@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 from datetime import datetime
 
 import sqlalchemy as sa
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from fyyur.schema.artist import (
     ArtistBasicInfoBase,
@@ -19,38 +21,40 @@ migrate = Migrate()
 
 venue_genre = db.Table(
     "venue_genres",
-    sa.Column("venue_id", sa.Integer, sa.ForeignKey("Venue.id"), primary_key=True),
-    sa.Column("genre_id", sa.Integer, sa.ForeignKey("Genre.id"), primary_key=True),
+    db.Column("venue_id", sa.Integer, sa.ForeignKey("Venue.id"), primary_key=True),
+    db.Column("genre_id", sa.Integer, sa.ForeignKey("Genre.id"), primary_key=True),
 )
 
 
 artist_genre = db.Table(
     "artist_genres",
-    sa.Column("artist_id", sa.Integer, sa.ForeignKey("Artist.id"), primary_key=True),
-    sa.Column("genre_id", sa.Integer, sa.ForeignKey("Genre.id"), primary_key=True),
+    db.Column("artist_id", sa.Integer, sa.ForeignKey("Artist.id"), primary_key=True),
+    db.Column("genre_id", sa.Integer, sa.ForeignKey("Genre.id"), primary_key=True),
 )
 
 
-class Venue(db.Model):
+class Venue(db.Model):  # type: ignore
     __tablename__ = "Venue"
 
-    id = sa.Column(sa.Integer, primary_key=True)
-    name = sa.Column(sa.String)
-    city = sa.Column(sa.String(120))
-    state = sa.Column(sa.String(120))
-    address = sa.Column(sa.String(120))
-    phone = sa.Column(sa.String(120))
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str]
 
-    image_link = sa.Column(sa.String(500), nullable=True)
-    facebook_link = sa.Column(sa.String(120), nullable=True)
-    website_link = sa.Column(sa.String(120), nullable=True)
+    # TODO: remove nullable if possible
+    city: Mapped[str] = mapped_column(sa.String(120), nullable=True)
+    state: Mapped[str] = mapped_column(sa.String(120), nullable=True)
+    address: Mapped[str] = mapped_column(sa.String(120), nullable=True)
+    phone: Mapped[str] = mapped_column(sa.String(120), nullable=True)
 
-    seeking_talent = sa.Column(sa.Boolean, default=False)
-    seeking_description = sa.Column(sa.String)
+    image_link: Mapped[str] = mapped_column(sa.String(500), nullable=True)
+    facebook_link: Mapped[str] = mapped_column(sa.String(120), nullable=True)
+    website_link: Mapped[str] = mapped_column(sa.String(120), nullable=True)
 
-    shows: Mapped[list["Show"]] = db.relationship("Show", backref="Venue", lazy=True)
+    seeking_talent: Mapped[bool] = mapped_column(default=False)
+    seeking_description: Mapped[str] = mapped_column(nullable=True)
 
-    genres: Mapped[list["Genre"]] = db.relationship(
+    shows: Mapped[list["Show"]] = relationship("Show", backref="Venue", lazy=True)
+
+    genres: Mapped[list["Genre"]] = relationship(
         "Genre",
         secondary=venue_genre,
         lazy="subquery",
@@ -58,25 +62,27 @@ class Venue(db.Model):
     )
 
 
-class Artist(db.Model):
+class Artist(db.Model):  # type: ignore
     __tablename__ = "Artist"
 
-    id = sa.Column(sa.Integer, primary_key=True)
-    name = sa.Column(sa.String)
-    city = sa.Column(sa.String(120))
-    state = sa.Column(sa.String(120))
-    phone = sa.Column(sa.String(120))
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str]
 
-    image_link = sa.Column(sa.String(500), nullable=True)
-    facebook_link = sa.Column(sa.String(120), nullable=True)
-    website_link = sa.Column(sa.String(120), nullable=True)
+    # TODO: remove nullable if possible
+    city: Mapped[str] = mapped_column(sa.String(120), nullable=True)
+    state: Mapped[str] = mapped_column(sa.String(120), nullable=True)
+    phone: Mapped[str] = mapped_column(sa.String(120), nullable=True)
 
-    seeking_venue = sa.Column(sa.Boolean, default=False)
-    seeking_description = sa.Column(sa.String)
+    image_link: Mapped[str] = mapped_column(sa.String(500), nullable=True)
+    facebook_link: Mapped[str] = mapped_column(sa.String(120), nullable=True)
+    website_link: Mapped[str] = mapped_column(sa.String(120), nullable=True)
 
-    shows: Mapped[list["Show"]] = db.relationship("Show", backref="Artist", lazy=True)
+    seeking_venue: Mapped[bool] = mapped_column(default=False)
+    seeking_description: Mapped[str] = mapped_column(sa.String, nullable=True)
 
-    genres: Mapped[list["Genre"]] = db.relationship(
+    shows: Mapped[list["Show"]] = relationship("Show", backref="Artist", lazy=True)
+
+    genres: Mapped[list["Genre"]] = relationship(
         "Genre",
         secondary=artist_genre,
         lazy="subquery",
@@ -121,13 +127,13 @@ class Artist(db.Model):
         )
 
 
-class Genre(db.Model):
+class Genre(db.Model):  # type: ignore
     __tablename__ = "Genre"
 
-    id = sa.Column(sa.Integer, primary_key=True)
-    name = sa.Column(sa.String)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str]
 
-    artists: Mapped[list["Artist"]] = db.relationship(
+    artists: Mapped[list["Artist"]] = relationship(
         "Artist",
         secondary=artist_genre,
         lazy="subquery",
@@ -135,7 +141,7 @@ class Genre(db.Model):
         viewonly=True,
     )
 
-    venues: Mapped[list["Venue"]] = db.relationship(
+    venues: Mapped[list["Venue"]] = relationship(
         "Venue",
         secondary=venue_genre,
         lazy="subquery",
@@ -144,20 +150,18 @@ class Genre(db.Model):
     )
 
 
-class Show(db.Model):
+class Show(db.Model):  # type: ignore
     __tablename__ = "Show"
 
-    id = sa.Column(sa.Integer, primary_key=True)
-    artist_id = sa.Column(sa.Integer, sa.ForeignKey("Artist.id"))
-    venue_id = sa.Column(sa.Integer, sa.ForeignKey("Venue.id"))
-    start_time = sa.Column(sa.DateTime)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    artist_id: Mapped[int] = mapped_column(sa.ForeignKey("Artist.id"))
+    venue_id: Mapped[int] = mapped_column(sa.ForeignKey("Venue.id"))
+    start_time: Mapped[datetime]
 
-    artist: Mapped["Artist"] = db.relationship(
+    artist: Mapped["Artist"] = relationship(
         "Artist", back_populates="shows", viewonly=True
     )
-    venue: Mapped["Venue"] = db.relationship(
-        "Venue", back_populates="shows", viewonly=True
-    )
+    venue: Mapped["Venue"] = relationship("Venue", back_populates="shows", viewonly=True)
 
     @property
     def is_past(self) -> bool:

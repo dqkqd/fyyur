@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import StrEnum
 from typing import Self
 
 from pydantic import field_serializer
@@ -6,7 +6,7 @@ from pydantic import field_serializer
 from fyyur.schema.base import BaseSchema
 
 
-class GenreEnum(Enum):
+class GenreEnum(StrEnum):
     Alternative = "Alternative"
     Blues = "Blues"
     Classical = "Classical"
@@ -38,8 +38,8 @@ class GenreInDb(BaseSchema):
 
     @classmethod
     def from_enum(cls, genre_enum: GenreEnum) -> Self:
-        return Self(name=genre_enum)
+        return cls(name=genre_enum)
 
     @classmethod
     def from_str(cls, name: str) -> Self:
-        return Self(name=name)
+        return cls(name=name)
