@@ -1,9 +1,11 @@
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 import pytest
 from flask import Flask
 from flask.testing import FlaskClient
 
+from fyyur.constant import DATETIME_FORMAT
 from fyyur.models import Artist, Show, Venue, db
 from fyyur.routes.show import get_shows
 from fyyur.schema.show import ShowResponse
@@ -54,29 +56,36 @@ def test_get_shows(app: Flask, client: FlaskClient) -> None:
     response = add_show(client=client, venue_id=1, artist_id=2, day_offset=200)
     assert response.status_code == 200
 
-    expected_shows = [
-        ShowResponse(
-            venue_id=1,
-            artist_id=1,
-            start_time=date_future(100),
-            venue_name="Venue1",
-            artist_name="Artist1",
-            artist_image_link="https://images.artist1.com/",
-        ),
-        ShowResponse(
-            venue_id=1,
-            artist_id=2,
-            start_time=date_future(200),
-            venue_name="Venue1",
-            artist_name="Artist2",
-            artist_image_link="https://images.artist2.com/",
-        ),
+    expected_shows: list[dict[str, int | str | datetime]] = [
+        {
+            "venue_id": 1,
+            "venue_name": "Venue1",
+            "artist_id": 1,
+            "artist_name": "Artist1",
+            "artist_image_link": "https://images.artist1.com/",
+            "start_time": date_future(100),
+        },
+        {
+            "venue_id": 1,
+            "venue_name": "Venue1",
+            "artist_id": 2,
+            "artist_name": "Artist2",
+            "artist_image_link": "https://images.artist2.com/",
+            "start_time": date_future(200),
+        },
     ]
 
     with app.app_context():
         all_shows = get_shows()
+        all_dumped_shows = [show.model_dump() for show in get_shows()]
+
         for show in expected_shows:
-            assert show in all_shows
+            assert ShowResponse(**show) in all_shows
+
+            show["start_time"] = datetime.strptime(
+                str(show["start_time"]), DATETIME_FORMAT
+            )
+            assert show in all_dumped_shows
 
 
 @pytest.mark.parametrize("venue_id, artist_id", [(1, 100), (100, 1), (100, 100)])
