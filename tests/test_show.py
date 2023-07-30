@@ -9,7 +9,8 @@ from fyyur.constant import DATETIME_FORMAT
 from fyyur.models import Artist, Show, Venue, db
 from fyyur.routes.show import get_shows
 from fyyur.schema.show import ShowResponse
-from tests.mock import date_future, mock_artist, mock_show, mock_venue
+from tests.mock import mock_artist, mock_show, mock_venue
+from tests.utils import date_future_str
 
 if TYPE_CHECKING:
     from werkzeug.test import TestResponse
@@ -63,7 +64,7 @@ def test_get_shows(app: Flask, client: FlaskClient) -> None:
             "artist_id": 1,
             "artist_name": "Artist1",
             "artist_image_link": "https://images.artist1.com/",
-            "start_time": date_future(100),
+            "start_time": date_future_str(100),
         },
         {
             "venue_id": 1,
@@ -71,7 +72,7 @@ def test_get_shows(app: Flask, client: FlaskClient) -> None:
             "artist_id": 2,
             "artist_name": "Artist2",
             "artist_image_link": "https://images.artist2.com/",
-            "start_time": date_future(200),
+            "start_time": date_future_str(200),
         },
     ]
 

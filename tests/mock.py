@@ -1,19 +1,9 @@
-from datetime import datetime, timedelta
-
-from fyyur.constant import DATETIME_FORMAT
 from fyyur.models import Artist, Genre, Show, Venue, db
 from fyyur.schema.artist import ArtistInDb
 from fyyur.schema.genre import GenreEnum, GenreInDb
 from fyyur.schema.show import ShowInDb
 from fyyur.schema.venue import VenueInDb
-
-
-def date_future(days: int = 1) -> str:
-    return (datetime.now() + timedelta(days=days)).strftime(DATETIME_FORMAT)
-
-
-def date_past(days: int = 1) -> str:
-    return (datetime.now() - timedelta(days=days)).strftime(DATETIME_FORMAT)
+from tests.utils import date_future_str, date_past_str
 
 
 def mock_venue(id: int, name: str | None = None) -> VenueInDb:
@@ -65,7 +55,9 @@ def mock_artists_db() -> list[Artist]:
 def mock_show(
     venue_id: int, artist_id: int, day_offset: int, id: int | None = None
 ) -> ShowInDb:
-    start_time = date_future(day_offset) if day_offset > 0 else date_past(-day_offset)
+    start_time = (
+        date_future_str(day_offset) if day_offset > 0 else date_past_str(-day_offset)
+    )
     return ShowInDb(id=id, venue_id=venue_id, artist_id=artist_id, start_time=start_time)
 
 
