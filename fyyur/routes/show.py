@@ -14,7 +14,7 @@ from werkzeug.wrappers.response import Response as FlaskResponse
 
 from fyyur.forms import ShowForm
 from fyyur.models import Artist, Show, Venue, db
-from fyyur.schema.show import ShowInDb, ShowResponse
+from fyyur.schema.show import ShowInForm, ShowResponse
 
 bp = Blueprint("show", __name__, url_prefix="/shows")
 
@@ -55,10 +55,10 @@ def insert_show(form: ShowForm) -> bool:
         return False
 
     try:
-        show_schema = ShowInDb(**form.data)
-        artist_id = show_schema.artist_id
-        venue_id = show_schema.venue_id
-        start_time = show_schema.start_time
+        show = ShowInForm(**form.data)
+        artist_id = show.artist_id
+        venue_id = show.venue_id
+        start_time = show.start_time
 
         if start_time < datetime.now():
             flash("Could not create show in the past", "error")
@@ -82,7 +82,7 @@ def insert_show(form: ShowForm) -> bool:
             flash("Show existed", "error")
             return False
 
-        db.session.add(show_schema.to_orm(Show))
+        db.session.add(show.to_orm(Show))
         db.session.commit()
 
     except ValidationError as e:

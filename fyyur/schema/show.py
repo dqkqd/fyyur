@@ -15,6 +15,10 @@ class ShowInDb(ShowBase):
     id: int | None = None
 
 
+class ShowInForm(ShowBase):
+    pass
+
+
 class ShowResponse(ShowBase):
     venue_name: str
     artist_name: str
