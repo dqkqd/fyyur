@@ -1,8 +1,16 @@
+from datetime import datetime
+
 import sqlalchemy as sa
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped
 
+from fyyur.schema.artist import (
+    ArtistBasicInfoBase,
+    ArtistInfoResponse,
+    ArtistSearchResponse,
+)
 from fyyur.schema.show import ShowBase, ShowInArtistInfo, ShowInDb, ShowResponse
 
 db = SQLAlchemy()
@@ -75,6 +83,43 @@ class Artist(db.Model):
         backref=db.backref("Artist", lazy=True),
     )
 
+    @hybrid_property
+    def upcoming_shows(self) -> list["Show"]:
+        return [show for show in self.shows if show.is_future]
+
+    @hybrid_property
+    def past_shows(self) -> list["Show"]:
+        return [show for show in self.shows if show.is_past]
+
+    @property
+    def upcoming_shows_count(self) -> int:
+        return len(self.upcoming_shows)
+
+    @property
+    def past_shows_count(self) -> int:
+        return len(self.past_shows)
+
+    def to_search_response(self) -> ArtistSearchResponse:
+        return ArtistSearchResponse(
+            name=self.name, num_upcoming_shows=self.upcoming_shows_count
+        )
+
+    def to_basic_info_base(self) -> ArtistBasicInfoBase:
+        return ArtistBasicInfoBase.model_validate(self)
+
+    def to_info_response(self) -> ArtistInfoResponse:
+        basic_info_base = self.to_basic_info_base()
+        upcomming_shows = [show.to_show_in_artist_info() for show in self.upcoming_shows]
+        past_shows = [show.to_show_in_artist_info() for show in self.past_shows]
+        print(self.upcoming_shows_count)
+        return ArtistInfoResponse(
+            **basic_info_base.model_dump(),
+            upcoming_shows=upcomming_shows,
+            past_shows=past_shows,
+            upcoming_shows_count=self.upcoming_shows_count,
+            past_shows_count=self.past_shows_count,
+        )
+
 
 class Genre(db.Model):
     __tablename__ = "Genre"
@@ -113,6 +158,14 @@ class Show(db.Model):
     venue: Mapped["Venue"] = db.relationship(
         "Venue", back_populates="shows", viewonly=True
     )
+
+    @property
+    def is_past(self) -> bool:
+        return self.start_time < datetime.now()
+
+    @property
+    def is_future(self) -> bool:
+        return not self.is_past
 
     def to_show_base(self) -> ShowBase:
         return ShowBase.model_validate(self)

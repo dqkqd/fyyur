@@ -113,14 +113,14 @@ def find_artists(search: SearchSchema) -> list[ArtistSearchResponse]:
     artists_in_db = Artist.query.filter(
         Artist.name.ilike(f"%{search.search_term}%")
     ).all()
-    return [ArtistSearchResponse.from_artist(artist=artist) for artist in artists_in_db]
+    return [artist.to_search_response() for artist in artists_in_db]
 
 
 def get_artist_info(artist_id: int) -> ArtistInfoResponse | None:
     artist = Artist.query.filter_by(id=artist_id).first()
     if artist is None:
         return None
-    return ArtistInfoResponse.from_artist(artist=artist)
+    return artist.to_info_response()
 
 
 def insert_artist(form: ArtistForm) -> bool:

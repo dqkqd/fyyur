@@ -1,9 +1,5 @@
-from datetime import datetime
-from typing import Self
-
 from pydantic import HttpUrl, field_serializer
 
-from fyyur.models import Artist, Show
 from fyyur.schema.base import BaseSchema, State
 from fyyur.schema.genre import GenreEnum, GenreInDb
 from fyyur.schema.show import ShowInArtistInfo, ShowInDb
@@ -15,14 +11,6 @@ class ArtistBase(BaseSchema):
 
 class ArtistSearchResponse(ArtistBase):
     num_upcoming_shows: int = 0
-
-    @classmethod
-    def from_artist(cls, artist: Artist) -> Self:
-        artist_search_response = cls.model_validate(artist)
-        artist_search_response.num_upcoming_shows = len(
-            [show for show in artist.shows if show.start_time >= datetime.now()]
-        )
-        return artist_search_response
 
 
 class ArtistBasicInfoBase(ArtistBase):
@@ -69,31 +57,3 @@ class ArtistInfoResponse(ArtistBasicInfoBase):
     upcoming_shows: list[ShowInArtistInfo]
     past_shows_count: int
     upcoming_shows_count: int
-
-    @classmethod
-    def from_artist(cls, artist: Artist) -> Self:
-        artist_info = ArtistInDb.model_validate(artist).to_artist_basic_info()
-
-        def is_past(show: Show) -> bool:
-            return show.start_time < datetime.now()
-
-        def is_future(show: Show) -> bool:
-            return not is_past(show)
-
-        past_shows = list(
-            map(lambda show: show.to_show_in_artist_info(), filter(is_past, artist.shows))
-        )
-        upcoming_shows = list(
-            map(
-                lambda show: show.to_show_in_artist_info(),
-                filter(is_future, artist.shows),
-            )
-        )
-
-        return cls(
-            **artist_info.model_dump(),
-            past_shows=past_shows,
-            upcoming_shows=upcoming_shows,
-            past_shows_count=len(past_shows),
-            upcoming_shows_count=len(upcoming_shows)
-        )
