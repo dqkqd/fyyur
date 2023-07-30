@@ -46,7 +46,7 @@ class ArtistInDb(ArtistInfo):
     genres: list[GenreInDb] = []
 
 
-class ArtistInfoResponse(ArtistInfo):
+class ArtistInfoResponse(ArtistInForm):
     past_shows: list[ShowInArtistInfo]
     upcoming_shows: list[ShowInArtistInfo]
     past_shows_count: int
