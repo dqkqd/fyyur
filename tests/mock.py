@@ -79,7 +79,7 @@ def mock_shows_db() -> list[Show]:
     ]
 
 
-def mock_genre(id: int, genre: GenreEnum) -> GenreInDb:
+def mock_genre(id: int | None, genre: GenreEnum) -> GenreInDb:
     return GenreInDb(id=id, name=genre)
 
 

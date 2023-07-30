@@ -91,6 +91,11 @@ def create_artist_submission():
     # TODO: insert form data as a new Venue record in the db, instead
     # TODO: modify data to be the data object returned from db insertion
 
+    form = ArtistForm()
+    if insert_artist(form):
+        return render_template("pages/home.html")
+    return redirect(url_for("artist.create_artist_form"))
+
     # on successful db insert, flash success
     flash("Artist " + request.form["name"] + " was successfully listed!")
     # TODO: on unsuccessful db insert, flash an error instead.
@@ -116,3 +121,19 @@ def get_artist_info(artist_id: int) -> ArtistInfoResponse | None:
     if artist is None:
         return None
     return ArtistInfoResponse.from_artist(artist=artist)
+
+
+def insert_artist(form: ArtistForm) -> bool:
+    print(request.form)
+    print(form.data)
+    if not form.validate_on_submit():
+        for error in form.errors.values():
+            for e in error:
+                flash(e, "error")
+                print(e)
+        return False
+
+    artist = ArtistInDb(**form.data)
+    print(artist)
+
+    return False

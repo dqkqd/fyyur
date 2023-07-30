@@ -136,3 +136,13 @@ def test_show_artist(client):
 
     response = client.get("artists/100")
     assert response.status_code == 404
+
+
+def test_insert_artist(client):
+    # artist = mock_artist(id=10, seeking_venue=True)
+    # artist.genres = [mock_genre(None, genre=GenreEnum.Country)]
+    # print(artist.model_dump_json())
+    # response = client.post("/artists/create", data=artist_in_form.model_dump())
+    # print(response.status_code)
+    # assert False
+    pass
