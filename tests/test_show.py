@@ -9,7 +9,7 @@ from fyyur.models import Artist, Show, Venue, db
 from fyyur.routes.show import get_shows
 from fyyur.schema.show import ShowResponse
 from tests.mock import mock_artist, mock_show, mock_venue
-from tests.utils import date_future, same_time
+from tests.utils import date_future
 
 if TYPE_CHECKING:
     from werkzeug.test import TestResponse
@@ -77,27 +77,10 @@ def test_get_shows(app: Flask, client: FlaskClient) -> None:
 
     with app.app_context():
         all_shows = get_shows()
-        [show.model_dump() for show in get_shows()]
-
+        dumped_shows = [show.model_dump() for show in get_shows()]
         for expected_show in expected_shows:
-            exists = False
-            for show in all_shows:
-                show_time = show.start_time
-                expected_show_time = expected_show["start_time"]
-                assert isinstance(expected_show_time, datetime)
-                if not same_time(show_time, expected_show_time):
-                    continue
-
-                expected_modified_show = expected_show.copy()
-                expected_modified_show["start_time"] = show_time
-                if (
-                    ShowResponse(**expected_modified_show) == show
-                    and expected_modified_show == show.model_dump()
-                ):
-                    exists = True
-                    break
-
-            assert exists is True
+            assert ShowResponse.model_validate(expected_show) in all_shows
+            assert expected_show in dumped_shows
 
 
 @pytest.mark.parametrize("venue_id, artist_id", [(1, 100), (100, 1), (100, 100)])

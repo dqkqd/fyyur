@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Any
 
 import pytest
@@ -7,10 +6,11 @@ from flask.testing import FlaskClient
 
 from fyyur.models import Artist, Show, db
 from fyyur.routes.artist import find_artists, get_artist_info, get_artists
+from fyyur.schema.artist import ArtistInfoResponse
 from fyyur.schema.base import SearchSchema
 from fyyur.schema.genre import GenreEnum
 from tests.mock import mock_artist, mock_show
-from tests.utils import date_future, date_past, same_time
+from tests.utils import date_future, date_past
 
 
 def test_get_artists(app: Flask) -> None:
@@ -211,28 +211,11 @@ def test_get_artist_info(
     with app.app_context():
         artist_info_response = get_artist_info(artist_id=artist_id)
         assert artist_info_response is not None
-
-        modified_artist_data = expected_artist_data.copy()
-        artist_info_response_dumped = artist_info_response.model_dump()
-        for key in ["past_shows", "upcoming_shows"]:
-            shows = artist_info_response_dumped.get(key, [])
-            expected_shows = expected_artist_data.get(key, [])
-            assert len(shows) == len(expected_shows)
-
-            for i in range(len(shows)):
-                show_time = shows[i].get("start_time", None)
-                expected_show_time = expected_shows[i].get("start_time", None)
-
-                assert show_time is not None
-                assert expected_show_time is not None
-
-                assert isinstance(show_time, datetime)
-                assert isinstance(expected_show_time, datetime)
-                assert same_time(show_time, expected_show_time)
-
-                modified_artist_data[key][i]["start_time"] = show_time
-
-        assert modified_artist_data == artist_info_response.model_dump()
+        assert expected_artist_data == artist_info_response.model_dump()
+        assert (
+            ArtistInfoResponse.model_validate(expected_artist_data)
+            == artist_info_response
+        )
 
 
 def test_show_artist(client: FlaskClient) -> None:
