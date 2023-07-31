@@ -131,9 +131,19 @@ def insert_artist(form: ArtistForm) -> bool:
         return False
 
     artist = ArtistInfo(**form.data).to_orm(Artist)
-    artist.genres = [
-        GenreBase(name=genre).to_orm(Genre) for genre in artist_in_form.genres
+
+    genres_in_form = artist_in_form.genres
+    genres_in_db = Genre.query.filter(
+        Genre.name.in_(name for name in genres_in_form)
+    ).all()
+    genres_in_db_names = {genre.name for genre in genres_in_db}
+    genres_not_in_db = [
+        GenreBase(name=genre).to_orm(Genre)
+        for genre in genres_in_form
+        if genre.name not in genres_in_db_names
     ]
+
+    artist.genres = genres_in_db + genres_not_in_db
 
     ok: bool = True
     try:

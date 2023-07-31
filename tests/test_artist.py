@@ -255,7 +255,6 @@ def test_insert_artist_should_insert_genre(app: Flask, client: FlaskClient) -> N
         assert Genre.query.filter_by(name=GenreEnum.Folk.value).first() is not None
 
 
-@pytest.mark.skip
 def test_insert_artist_should_not_insert_duplicated_genres(
     app: Flask, client: FlaskClient
 ) -> None:
@@ -266,6 +265,9 @@ def test_insert_artist_should_not_insert_duplicated_genres(
     assert response.status_code == 200
 
     with app.app_context():
+        king: Artist = Artist.query.filter_by(name="King").first()
+        assert len(king.genres) == 1
+        assert king.genres[0].name == GenreEnum.Folk.value
         assert Genre.query.filter_by(name=GenreEnum.Folk.value).count() == 1
 
     artist = mock_artist(id=20, name="Queen", seeking_venue=True)
@@ -275,4 +277,7 @@ def test_insert_artist_should_not_insert_duplicated_genres(
     assert response.status_code == 200
 
     with app.app_context():
+        queen: Artist = Artist.query.filter_by(name="Queen").first()
+        assert len(queen.genres) == 1
+        assert queen.genres[0].name == GenreEnum.Folk.value
         assert Genre.query.filter_by(name=GenreEnum.Folk.value).count() == 1
