@@ -35,7 +35,8 @@ def create_shows() -> str:
 @bp.route("/create", methods=["POST"])
 def create_show_submission() -> FlaskResponse | str:
     form = ShowForm()
-    if insert_show(form):
+    ok = insert_show(form)
+    if ok:
         return render_template("pages/home.html")
     return redirect(url_for("show.create_shows"))
 
@@ -59,35 +60,41 @@ def insert_show(form: ShowForm) -> bool:
         artist_id = show.artist_id
         venue_id = show.venue_id
         start_time = show.start_time
-
-        if start_time < datetime.now():
-            flash("Could not create show in the past", "error")
-            return False
-
-        if (
-            not Artist.query.filter_by(id=artist_id).first()
-            or not Venue.query.filter_by(id=venue_id).first()
-        ):
-            flash("Artist or Venue doesn't exist", "error")
-            return False
-
-        offset = timedelta(minutes=1)
-        existed_shows = (
-            Show.query.filter(Show.start_time >= start_time - offset)
-            .filter(Show.start_time <= start_time + offset)
-            .filter(or_(Show.artist_id == artist_id, Show.venue_id == venue_id))
-            .first()
-        )
-        if existed_shows:
-            flash("Show existed", "error")
-            return False
-
-        db.session.add(show.to_orm(Show))
-        db.session.commit()
-
     except ValidationError as e:
         flash(f"{e}", "error")
         return False
 
-    flash("Show was successfully listed!", "info")
-    return True
+    if start_time < datetime.now():
+        flash("Could not create show in the past", "error")
+        return False
+
+    if (
+        not Artist.query.filter_by(id=artist_id).first()
+        or not Venue.query.filter_by(id=venue_id).first()
+    ):
+        flash("Artist or Venue doesn't exist", "error")
+        return False
+
+    offset = timedelta(minutes=1)
+    existed_shows = (
+        Show.query.filter(Show.start_time >= start_time - offset)
+        .filter(Show.start_time <= start_time + offset)
+        .filter(or_(Show.artist_id == artist_id, Show.venue_id == venue_id))
+        .first()
+    )
+    if existed_shows:
+        flash("Show existed", "error")
+        return False
+
+    ok: bool = True
+    try:
+        db.session.add(show.to_orm(Show))
+        db.session.commit()
+        flash("Show was successfully listed!", "info")
+    except Exception as e:
+        flash(f"{e}", "error")
+        ok = False
+    finally:
+        db.session.rollback()
+
+    return ok
