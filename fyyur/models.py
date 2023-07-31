@@ -56,14 +56,11 @@ class Venue(db.Model):  # type: ignore
     seeking_talent: Mapped[bool] = mapped_column(default=False)
     seeking_description: Mapped[str] = mapped_column(nullable=True)
 
-    shows: Mapped[list["Show"]] = relationship("Show", backref="Venue", lazy=True)
-
-    genres: Mapped[list["Genre"]] = relationship(
-        "Genre",
-        secondary=venue_genre,
-        lazy="subquery",
-        backref=db.backref("Venue", lazy=True),
+    shows: Mapped[list["Show"]] = relationship(
+        back_populates="venue", lazy=True, cascade="all, delete-orphan"
     )
+
+    genres: Mapped[list["Genre"]] = relationship(secondary=venue_genre, lazy="subquery")
 
 
 class Artist(db.Model):  # type: ignore
@@ -84,14 +81,11 @@ class Artist(db.Model):  # type: ignore
     seeking_venue: Mapped[bool] = mapped_column(default=False)
     seeking_description: Mapped[str] = mapped_column(sa.String, nullable=True)
 
-    shows: Mapped[list["Show"]] = relationship("Show", backref="Artist", lazy=True)
-
-    genres: Mapped[list["Genre"]] = relationship(
-        "Genre",
-        secondary=artist_genre,
-        lazy="subquery",
-        backref=db.backref("Artist", lazy=True),
+    shows: Mapped[list["Show"]] = relationship(
+        back_populates="artist", lazy=True, cascade="all, delete-orphan"
     )
+
+    genres: Mapped[list["Genre"]] = relationship(secondary=artist_genre, lazy="subquery")
 
     @hybrid_property
     def upcoming_shows(self) -> list["Show"]:
@@ -154,19 +148,11 @@ class Genre(db.Model):  # type: ignore
     name: Mapped[str]
 
     artists: Mapped[list["Artist"]] = relationship(
-        "Artist",
-        secondary=artist_genre,
-        lazy="subquery",
-        backref=db.backref("Genre", lazy=True),
-        viewonly=True,
+        secondary=artist_genre, lazy="subquery", viewonly=True
     )
 
     venues: Mapped[list["Venue"]] = relationship(
-        "Venue",
-        secondary=venue_genre,
-        lazy="subquery",
-        backref=db.backref("Genre", lazy=True),
-        viewonly=True,
+        secondary=venue_genre, lazy="subquery", viewonly=True
     )
 
     @property
@@ -182,10 +168,8 @@ class Show(db.Model):  # type: ignore
     venue_id: Mapped[int] = mapped_column(sa.ForeignKey("Venue.id"))
     start_time: Mapped[datetime]
 
-    artist: Mapped["Artist"] = relationship(
-        "Artist", back_populates="shows", viewonly=True
-    )
-    venue: Mapped["Venue"] = relationship("Venue", back_populates="shows", viewonly=True)
+    artist: Mapped["Artist"] = relationship(back_populates="shows", viewonly=True)
+    venue: Mapped["Venue"] = relationship(back_populates="shows", viewonly=True)
 
     @property
     def is_past(self) -> bool:
