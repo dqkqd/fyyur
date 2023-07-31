@@ -295,11 +295,23 @@ def test_update_artist_basic(app: Flask, client: FlaskClient) -> None:
     with app.app_context():
         artist: Artist | None = Artist.query.filter_by(id=1).first()
         assert artist is not None
-    artist_in_form = artist.artist_in_form
 
-    new_genres = [GenreEnum.Folk]
-    assert artist_in_form.genres != new_genres
-    artist_in_form.genres = new_genres
+        # Fold doesn't exist
+        for genre in artist.genres:
+            assert genre.name != GenreEnum.Folk.value
 
-    response = client.post("/artists/1/edit", data=artist_in_form.model_dump(mode="json"))
-    assert response.status_code == 200
+        artist_in_form = artist.artist_in_form
+
+        new_genres = [GenreEnum.Folk]
+        assert artist_in_form.genres != new_genres
+        artist_in_form.genres = new_genres
+
+    client.post("/artists/1/edit", data=artist_in_form.model_dump(mode="json"))
+
+    with app.app_context():
+        updated_artist: Artist | None = Artist.query.filter_by(id=1).first()
+        assert updated_artist is not None
+
+        # Folk exist now
+        assert len(updated_artist.genres) == 1
+        assert updated_artist.genres[0].name == GenreEnum.Folk.value

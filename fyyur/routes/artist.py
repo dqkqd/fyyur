@@ -5,6 +5,7 @@ from werkzeug.wrappers.response import Response as FlaskResponse
 from fyyur.forms import ArtistForm
 from fyyur.models import Artist, Genre, db
 from fyyur.schema.artist import (
+    ArtistInfo,
     ArtistInfoResponse,
     ArtistInForm,
     ArtistResponse,
@@ -64,7 +65,7 @@ def edit_artist(artist_id: int) -> str:
 @bp.route("/<int:artist_id>/edit", methods=["POST"])
 def edit_artist_submission(artist_id: int) -> FlaskResponse:
     form = ArtistForm()
-    ok = update_artist(form)
+    ok = update_artist(form, artist_id)
     if ok:
         return redirect(url_for("artist.show_artist", artist_id=artist_id))
     return redirect(url_for("artist.edit_artist", artist_id=artist_id))
@@ -163,5 +164,32 @@ def insert_artist(form: ArtistForm) -> bool:
     return ok
 
 
-def update_artist(form: ArtistForm) -> bool:
-    raise NotImplementedError
+def update_artist(form: ArtistForm, artist_id: int) -> bool:
+    artist_in_form = form_to_artist(form)
+    if artist_in_form is None:
+        return False
+
+    artist = Artist.query.filter_by(id=artist_id).first()
+
+    if artist is None:
+        flash("Artist doesn't exist")
+        return False
+
+    genres_in_form = artist_in_form.genres
+    genres_in_db = Genre.query.filter(
+        Genre.name.in_(name for name in genres_in_form)
+    ).all()
+    genres_in_db_names = {genre.name for genre in genres_in_db}
+    genres_not_in_db = [
+        GenreBase(name=genre).to_orm(Genre)
+        for genre in genres_in_form
+        if genre.name not in genres_in_db_names
+    ]
+    artist.genres = genres_in_db + genres_not_in_db
+
+    artist_info = ArtistInfo(**artist_in_form.model_dump())
+    for key, value in artist_info.model_dump().items():
+        setattr(artist, key, value)
+
+    db.session.commit()
+    return True
