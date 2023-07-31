@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Self
 
 import sqlalchemy as sa
 from flask_migrate import Migrate
@@ -17,7 +18,7 @@ from fyyur.schema.artist import (
     ArtistResponse,
     ArtistSearchResponse,
 )
-from fyyur.schema.genre import GenreBase
+from fyyur.schema.genre import GenreBase, GenreEnum
 from fyyur.schema.show import ShowBase, ShowInArtistInfo, ShowInDb, ShowResponse
 
 db = SQLAlchemy()
@@ -165,6 +166,19 @@ class Genre(db.Model):  # type: ignore
     @property
     def genre_base(self) -> GenreBase:
         return GenreBase.model_validate(self)
+
+    @classmethod
+    def genres_in_and_out_db(cls, genres: list[GenreEnum]) -> list[Self]:
+        genres_in_db: list[Self] = cls.query.filter(
+            cls.name.in_(genre.value for genre in genres)
+        ).all()
+        genres_in_db_names = {genre.name for genre in genres_in_db}
+        genres_out_db = [
+            GenreBase(name=genre).to_orm(Genre)
+            for genre in genres
+            if genre.value not in genres_in_db_names
+        ]
+        return genres_in_db + genres_out_db
 
 
 class Show(db.Model):  # type: ignore

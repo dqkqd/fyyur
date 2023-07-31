@@ -12,7 +12,6 @@ from fyyur.schema.artist import (
     ArtistSearchResponse,
 )
 from fyyur.schema.base import SearchSchema
-from fyyur.schema.genre import GenreBase
 
 bp = Blueprint("artist", __name__, url_prefix="/artists")
 
@@ -131,19 +130,7 @@ def insert_artist(form: ArtistForm) -> bool:
         return False
 
     artist = artist_in_form.to_orm(Artist)
-
-    genres_in_form = artist_in_form.genres
-    genres_in_db = Genre.query.filter(
-        Genre.name.in_(name for name in genres_in_form)
-    ).all()
-    genres_in_db_names = {genre.name for genre in genres_in_db}
-    genres_not_in_db = [
-        GenreBase(name=genre).to_orm(Genre)
-        for genre in genres_in_form
-        if genre.name not in genres_in_db_names
-    ]
-
-    artist.genres = genres_in_db + genres_not_in_db
+    artist.genres = Genre.genres_in_and_out_db(artist_in_form.genres)
 
     ok: bool = True
     try:
@@ -175,17 +162,7 @@ def update_artist(form: ArtistForm, artist_id: int) -> bool:
         flash("Artist doesn't exist")
         return False
 
-    genres_in_form = artist_in_form.genres
-    genres_in_db = Genre.query.filter(
-        Genre.name.in_(name for name in genres_in_form)
-    ).all()
-    genres_in_db_names = {genre.name for genre in genres_in_db}
-    genres_not_in_db = [
-        GenreBase(name=genre).to_orm(Genre)
-        for genre in genres_in_form
-        if genre.name not in genres_in_db_names
-    ]
-    artist.genres = genres_in_db + genres_not_in_db
+    artist.genres = Genre.genres_in_and_out_db(artist_in_form.genres)
 
     artist_info = ArtistInfo(**artist_in_form.model_dump())
     for key, value in artist_info.model_dump().items():
