@@ -147,7 +147,7 @@ class Genre(db.Model):  # type: ignore
     __tablename__ = "Genre"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str]
+    name: Mapped[str] = mapped_column(unique=True)
 
     artists: Mapped[list["Artist"]] = relationship(
         secondary=artist_genre, lazy="subquery", viewonly=True
