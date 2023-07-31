@@ -4,7 +4,7 @@ import pytest
 from flask import Flask
 from flask.testing import FlaskClient
 
-from fyyur.models import Artist, Show, db
+from fyyur.models import Artist, Genre, Show, db
 from fyyur.routes.artist import find_artists, get_artist_info, get_artists
 from fyyur.schema.artist import ArtistInfoResponse
 from fyyur.schema.base import SearchSchema
@@ -237,3 +237,42 @@ def test_basic_insert_artist(app: Flask, client: FlaskClient) -> None:
         artists: list[Artist] = Artist.query.filter_by(name="King").all()
         assert len(artists) == 1
         assert artists[0].artist_in_form == artist_in_form
+
+
+def test_insert_artist_should_insert_genre(app: Flask, client: FlaskClient) -> None:
+    artist = mock_artist(id=10, name="King", seeking_venue=True)
+    artist_in_form = artist.to_orm(Artist).artist_in_form
+    artist_in_form.genres = [GenreEnum.Folk]
+
+    # make sure Folk doesn't exist
+    with app.app_context():
+        assert Genre.query.filter_by(name=GenreEnum.Folk.value).first() is None
+
+    response = client.post("/artists/create", data=artist_in_form.model_dump())
+    assert response.status_code == 200
+
+    with app.app_context():
+        assert Genre.query.filter_by(name=GenreEnum.Folk.value).first() is not None
+
+
+@pytest.mark.skip
+def test_insert_artist_should_not_insert_duplicated_genres(
+    app: Flask, client: FlaskClient
+) -> None:
+    artist = mock_artist(id=10, name="King", seeking_venue=True)
+    artist_in_form = artist.to_orm(Artist).artist_in_form
+    artist_in_form.genres = [GenreEnum.Folk]
+    response = client.post("/artists/create", data=artist_in_form.model_dump())
+    assert response.status_code == 200
+
+    with app.app_context():
+        assert Genre.query.filter_by(name=GenreEnum.Folk.value).count() == 1
+
+    artist = mock_artist(id=20, name="Queen", seeking_venue=True)
+    artist_in_form = artist.to_orm(Artist).artist_in_form
+    artist_in_form.genres = [GenreEnum.Folk]
+    response = client.post("/artists/create", data=artist_in_form.model_dump())
+    assert response.status_code == 200
+
+    with app.app_context():
+        assert Genre.query.filter_by(name=GenreEnum.Folk.value).count() == 1
