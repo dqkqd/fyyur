@@ -56,7 +56,7 @@ def insert_show(form: ShowForm) -> bool:
         return False
 
     try:
-        show = ShowInForm(**form.data)
+        show = ShowInForm.model_validate(form.data)
         artist_id = show.artist_id
         venue_id = show.venue_id
         start_time = show.start_time
