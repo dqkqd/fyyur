@@ -168,5 +168,19 @@ def update_artist(form: ArtistForm, artist_id: int) -> bool:
     for key, value in artist_info.model_dump().items():
         setattr(artist, key, value)
 
-    db.session.commit()
-    return True
+    ok: bool = True
+    try:
+        db.session.commit()
+
+        flash(f"Artist ID: {artist_id} was successfully edited!")
+
+    except Exception as e:
+        db.session.rollback()
+        ok = False
+
+        flash(str(e), "error")
+
+    finally:
+        db.session.close()
+
+    return ok
