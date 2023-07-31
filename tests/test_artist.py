@@ -289,3 +289,17 @@ def test_artist_edit_form_request(client: FlaskClient) -> None:
 
     response = client.get("/artists/100/edit")
     assert response.status_code == 404
+
+
+def test_update_artist_basic(app: Flask, client: FlaskClient) -> None:
+    with app.app_context():
+        artist: Artist | None = Artist.query.filter_by(id=1).first()
+        assert artist is not None
+    artist_in_form = artist.artist_in_form
+
+    new_genres = [GenreEnum.Folk]
+    assert artist_in_form.genres != new_genres
+    artist_in_form.genres = new_genres
+
+    response = client.post("/artists/1/edit", data=artist_in_form.model_dump(mode="json"))
+    assert response.status_code == 200
