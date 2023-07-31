@@ -1,4 +1,5 @@
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
+from pydantic import ValidationError
 from werkzeug.wrappers.response import Response as FlaskResponse
 
 from fyyur.forms import ArtistForm
@@ -95,7 +96,8 @@ def create_artist_submission() -> FlaskResponse | str:
     # TODO: modify data to be the data object returned from db insertion
 
     form = ArtistForm()
-    if insert_artist(form):
+    ok = insert_artist(form)
+    if ok:
         return render_template("pages/home.html")
     return redirect(url_for("artist.create_artist_form"))
 
@@ -132,23 +134,27 @@ def insert_artist(form: ArtistForm) -> bool:
                 flash(e, "error")
         return False
 
-    status: bool = True
     try:
         artist_in_form = ArtistInForm(**form.data)
-        artist = ArtistInfo(**form.data).to_orm(Artist)
-        artist.genres = [
-            GenreBase(name=genre).to_orm(Genre) for genre in artist_in_form.genres
-        ]
+    except ValidationError as e:
+        flash(str(e), "error")
+        return False
+
+    artist = ArtistInfo(**form.data).to_orm(Artist)
+    artist.genres = [
+        GenreBase(name=genre).to_orm(Genre) for genre in artist_in_form.genres
+    ]
+
+    ok: bool = True
+    try:
         db.session.add(artist)
         db.session.commit()
         flash(f"Artist: {artist_in_form.name} was successfully listed!")
-
     except Exception as e:
-        flash(f"{e}", "error")
+        flash(str(e), "error")
         db.session.rollback()
-        status = False
-
+        ok = False
     finally:
         db.session.close()
 
-    return status
+    return ok
