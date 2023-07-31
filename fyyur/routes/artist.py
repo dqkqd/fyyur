@@ -64,10 +64,11 @@ def edit_artist(artist_id: int) -> str:
 
 @bp.route("/<int:artist_id>/edit", methods=["POST"])
 def edit_artist_submission(artist_id: int) -> FlaskResponse:
-    # TODO: take values from the form submitted, and update existing
-    # artist record with ID <artist_id> using the new attributes
-
-    return redirect(url_for("show_artist", artist_id=artist_id))
+    form = ArtistForm()
+    ok = update_artist(form)
+    if ok:
+        return redirect(url_for("artist.show_artist", artist_id=artist_id))
+    return redirect(url_for("artist.edit_artist", artist_id=artist_id))
 
 
 #  Create Artist
@@ -153,3 +154,7 @@ def insert_artist(form: ArtistForm) -> bool:
         db.session.close()
 
     return ok
+
+
+def update_artist(form: ArtistForm) -> bool:
+    raise NotImplementedError
