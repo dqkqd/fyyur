@@ -108,17 +108,25 @@ def get_artist_info(artist_id: int) -> ArtistInfoResponse | None:
     return artist.artist_info_response
 
 
-def insert_artist(form: ArtistForm) -> bool:
+def form_to_artist(form: ArtistForm) -> ArtistInForm | None:
     if not form.validate_on_submit():
         for error in form.errors.values():
             for e in error:
                 flash(e, "error")
-        return False
+        return None
 
     try:
-        artist_in_form = ArtistInForm(**form.data)
+        artist_in_form = ArtistInForm.model_validate(form.data)
     except ValidationError as e:
         flash(str(e), "error")
+        return None
+
+    return artist_in_form
+
+
+def insert_artist(form: ArtistForm) -> bool:
+    artist_in_form = form_to_artist(form)
+    if artist_in_form is None:
         return False
 
     artist = artist_in_form.to_orm(Artist)
