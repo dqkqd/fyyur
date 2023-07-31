@@ -5,7 +5,6 @@ from werkzeug.wrappers.response import Response as FlaskResponse
 from fyyur.forms import ArtistForm
 from fyyur.models import Artist, Genre, db
 from fyyur.schema.artist import (
-    ArtistInfo,
     ArtistInfoResponse,
     ArtistInForm,
     ArtistResponse,
@@ -162,11 +161,9 @@ def update_artist(form: ArtistForm, artist_id: int) -> bool:
         flash("Artist doesn't exist")
         return False
 
-    artist.genres = Genre.genres_in_and_out_db(artist_in_form.genres)
-
-    artist_info = ArtistInfo(**artist_in_form.model_dump())
-    for key, value in artist_info.model_dump().items():
+    for key, value in artist_in_form.model_dump(exclude={"genres"}).items():
         setattr(artist, key, value)
+    artist.genres = Genre.genres_in_and_out_db(artist_in_form.genres)
 
     ok: bool = True
     try:
