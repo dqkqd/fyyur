@@ -281,3 +281,11 @@ def test_insert_artist_should_not_insert_duplicated_genres(
         assert len(queen.genres) == 1
         assert queen.genres[0].name == GenreEnum.Folk.value
         assert Genre.query.filter_by(name=GenreEnum.Folk.value).count() == 1
+
+
+def test_artist_edit_form_request(client: FlaskClient) -> None:
+    response = client.get("/artists/1/edit")
+    assert response.status_code == 200
+
+    response = client.get("/artists/100/edit")
+    assert response.status_code == 404
