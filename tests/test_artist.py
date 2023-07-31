@@ -315,3 +315,19 @@ def test_update_artist_basic(app: Flask, client: FlaskClient) -> None:
         # Folk exist now
         assert len(updated_artist.genres) == 1
         assert updated_artist.genres[0].name == GenreEnum.Folk.value
+
+
+def test_update_non_existing_artist(app: Flask, client: FlaskClient) -> None:
+    with app.app_context():
+        artist: Artist | None = Artist.query.filter_by(id=1).first()
+        assert artist is not None
+        artist_in_form = artist.artist_in_form
+        artist_in_form.name = "King"
+
+    client.post("/artists/100/edit", data=artist_in_form.model_dump(mode="json"))
+
+    with app.app_context():
+        assert Artist.query.filter_by(id=100).first() is None
+        updated_artist: Artist | None = Artist.query.filter_by(id=1).first()
+        assert updated_artist is not None
+        assert updated_artist.artist_in_form != artist_in_form
