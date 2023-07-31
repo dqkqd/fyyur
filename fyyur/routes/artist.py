@@ -139,11 +139,15 @@ def insert_artist(form: ArtistForm) -> bool:
     try:
         db.session.add(artist)
         db.session.commit()
+
         flash(f"Artist: {artist_in_form.name} was successfully listed!")
+
     except Exception as e:
-        flash(str(e), "error")
         db.session.rollback()
         ok = False
+
+        flash(str(e), "error")
+
     finally:
         db.session.close()
 

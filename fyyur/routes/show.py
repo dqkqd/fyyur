@@ -61,7 +61,7 @@ def insert_show(form: ShowForm) -> bool:
         venue_id = show.venue_id
         start_time = show.start_time
     except ValidationError as e:
-        flash(f"{e}", "error")
+        flash(str(e), "error")
         return False
 
     if start_time < datetime.now():
@@ -90,11 +90,16 @@ def insert_show(form: ShowForm) -> bool:
     try:
         db.session.add(show.to_orm(Show))
         db.session.commit()
+
         flash("Show was successfully listed!", "info")
+
     except Exception as e:
-        flash(f"{e}", "error")
-        ok = False
-    finally:
         db.session.rollback()
+        ok = False
+
+        flash(str(e), "error")
+
+    finally:
+        db.session.close()
 
     return ok
