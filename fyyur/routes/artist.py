@@ -5,7 +5,6 @@ from werkzeug.wrappers.response import Response as FlaskResponse
 from fyyur.forms import ArtistForm
 from fyyur.models import Artist, Genre, db
 from fyyur.schema.artist import (
-    ArtistInfo,
     ArtistInfoResponse,
     ArtistInForm,
     ArtistResponse,
@@ -122,7 +121,7 @@ def insert_artist(form: ArtistForm) -> bool:
         flash(str(e), "error")
         return False
 
-    artist = ArtistInfo(**form.data).to_orm(Artist)
+    artist = artist_in_form.to_orm(Artist)
 
     genres_in_form = artist_in_form.genres
     genres_in_db = Genre.query.filter(
