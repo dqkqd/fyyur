@@ -85,7 +85,9 @@ class Artist(db.Model):  # type: ignore
         back_populates="artist", lazy=True, cascade="all, delete-orphan"
     )
 
-    genres: Mapped[list["Genre"]] = relationship(secondary=artist_genre, lazy="subquery")
+    genres: Mapped[list["Genre"]] = relationship(
+        secondary=artist_genre, lazy="subquery", cascade="all, delete"
+    )
 
     @hybrid_property
     def upcoming_shows(self) -> list["Show"]:
