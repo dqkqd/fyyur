@@ -91,21 +91,11 @@ def create_artist_form() -> str:
 
 @bp.route("/create", methods=["POST"])
 def create_artist_submission() -> FlaskResponse | str:
-    # called upon submitting the new artist listing form
-    # TODO: insert form data as a new Venue record in the db, instead
-    # TODO: modify data to be the data object returned from db insertion
-
     form = ArtistForm()
     ok = insert_artist(form)
     if ok:
         return render_template("pages/home.html")
     return redirect(url_for("artist.create_artist_form"))
-
-    # on successful db insert, flash success
-    flash("Artist " + request.form["name"] + " was successfully listed!")
-    # TODO: on unsuccessful db insert, flash an error instead.
-    # e.g., flash('An error occurred. Artist ' + data.name + ' could not be listed.')
-    return render_template("pages/home.html")
 
 
 def get_artists() -> list[ArtistResponse]:
