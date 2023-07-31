@@ -10,6 +10,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from fyyur.schema.artist import (
     ArtistBase,
+    ArtistInDb,
     ArtistInfo,
     ArtistInfoResponse,
     ArtistInForm,
@@ -141,6 +142,10 @@ class Artist(db.Model):  # type: ignore
             upcoming_shows_count=self.upcoming_shows_count,
             past_shows_count=self.past_shows_count,
         )
+
+    @property
+    def artist_in_db(self) -> ArtistInDb:
+        return ArtistInDb.model_validate(self)
 
 
 class Genre(db.Model):  # type: ignore
