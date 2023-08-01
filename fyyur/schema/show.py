@@ -38,3 +38,14 @@ class ShowInArtistInfo(BaseSchema):
     @field_serializer("venue_image_link")
     def serialize_url(self, url: HttpUrl) -> str:
         return str(url)
+
+
+class ShowInVenueInfo(BaseSchema):
+    artist_id: int
+    artist_name: str
+    artist_image_link: HttpUrl
+    start_time: datetime
+
+    @field_serializer("artist_image_link")
+    def serialize_url(self, url: HttpUrl) -> str:
+        return str(url)
