@@ -9,14 +9,20 @@ class VenueBase(BaseSchema):
     name: str
 
 
-class VenueSearchResponse(VenueBase):
+class VenueResponse(VenueBase):
     id: int
     num_upcoming_shows: int
 
 
-class VenueResponse(VenueSearchResponse):
-    city: str | None = None
-    state: str | None = None
+class VenueLocation(BaseSchema):
+    city: str
+    state: str
+
+
+class VenueResponseList(BaseSchema):
+    city: str
+    state: str
+    venues: list[VenueResponse]
 
 
 class VenueInfo(VenueBase):
