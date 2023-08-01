@@ -191,38 +191,6 @@ def edit_venue_submission(venue_id: int) -> FlaskResponse | str:
 
 
 def get_venues() -> list[VenueResponseList]:
-    # TODO: replace with real venues data.
-    #       num_upcoming_shows should be aggregated based on number of upcoming shows per venue.
-    _data = [
-        {
-            "city": "San Francisco",
-            "state": "CA",
-            "venues": [
-                {
-                    "id": 1,
-                    "name": "The Musical Hop",
-                    "num_upcoming_shows": 0,
-                },
-                {
-                    "id": 3,
-                    "name": "Park Square Live Music & Coffee",
-                    "num_upcoming_shows": 1,
-                },
-            ],
-        },
-        {
-            "city": "New York",
-            "state": "NY",
-            "venues": [
-                {
-                    "id": 2,
-                    "name": "The Dueling Pianos Bar",
-                    "num_upcoming_shows": 0,
-                }
-            ],
-        },
-    ]
-
     results: dict[VenueLocation, list[VenueResponse]] = {}
     venues: list[Venue] = Venue.query.order_by("id").all()
     for venue in venues:
