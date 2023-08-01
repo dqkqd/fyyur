@@ -4,6 +4,7 @@ from werkzeug.wrappers.response import Response as FlaskResponse
 
 from fyyur.forms import VenueForm
 from fyyur.models import Genre, Venue, db
+from fyyur.schema.base import SearchSchema
 from fyyur.schema.venue import (
     VenueInForm,
     VenueLocation,
@@ -22,23 +23,17 @@ def venues() -> str:
 
 @bp.route("/search", methods=["POST"])
 def search_venues() -> str:
-    # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
-    # seach for Hop should return "The Musical Hop".
-    # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
+    search_schema = SearchSchema(**request.form)
+    data = [venue.model_dump(mode="json") for venue in find_venues(search_schema)]
     response = {
-        "count": 1,
-        "data": [
-            {
-                "id": 2,
-                "name": "The Dueling Pianos Bar",
-                "num_upcoming_shows": 0,
-            }
-        ],
+        "count": len(data),
+        "data": data,
     }
+
     return render_template(
         "pages/search_venues.html",
         results=response,
-        search_term=request.form.get("search_term", ""),
+        search_term=search_schema.search_term,
     )
 
 
@@ -209,6 +204,13 @@ def get_venues() -> list[VenueResponseList]:
     ]
 
     return data
+
+
+def find_venues(search: SearchSchema) -> list[VenueResponse]:
+    venues: list[Venue] = Venue.query.filter(
+        Venue.name.ilike(f"%{search.search_term}%")
+    ).all()
+    return [venue.venue_response for venue in venues]
 
 
 def form_to_venue(form: VenueForm) -> VenueInForm | None:
