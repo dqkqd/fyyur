@@ -51,7 +51,7 @@ class VenueInfo(VenueBase):
         return state.value
 
 
-class VenueInForm(VenueBase):
+class VenueInForm(VenueInfo):
     genres: list[GenreEnum]
 
 

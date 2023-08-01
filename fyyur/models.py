@@ -20,7 +20,7 @@ from fyyur.schema.artist import (
 )
 from fyyur.schema.genre import GenreBase, GenreEnum
 from fyyur.schema.show import ShowBase, ShowInArtistInfo, ShowInDb, ShowResponse
-from fyyur.schema.venue import VenueResponse
+from fyyur.schema.venue import VenueInfo, VenueInForm, VenueResponse
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -85,6 +85,17 @@ class Venue(db.Model):  # type: ignore
     def venue_response(self) -> VenueResponse:
         return VenueResponse(
             id=self.id, name=self.name, num_upcoming_shows=self.upcoming_shows_count
+        )
+
+    @property
+    def venue_info(self) -> VenueInfo:
+        return VenueInfo.model_validate(self)
+
+    @property
+    def venue_in_form(self) -> VenueInForm:
+        genres = [genre.genre_base for genre in self.genres]
+        return VenueInForm(
+            **self.venue_info.model_dump(), genres=[genre.name for genre in genres]
         )
 
 

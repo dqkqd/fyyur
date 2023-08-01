@@ -1,9 +1,15 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
+from pydantic import ValidationError
 from werkzeug.wrappers.response import Response as FlaskResponse
 
 from fyyur.forms import VenueForm
-from fyyur.models import Venue
-from fyyur.schema.venue import VenueLocation, VenueResponse, VenueResponseList
+from fyyur.models import Genre, Venue, db
+from fyyur.schema.venue import (
+    VenueInForm,
+    VenueLocation,
+    VenueResponse,
+    VenueResponseList,
+)
 
 bp = Blueprint("venue", __name__, url_prefix="/venues")
 
@@ -140,16 +146,12 @@ def create_venue_form() -> str:
 
 
 @bp.route("/create", methods=["POST"])
-def create_venue_submission() -> str:
-    # TODO: insert form data as a new Venue record in the db, instead
-    # TODO: modify data to be the data object returned from db insertion
-
-    # on successful db insert, flash success
-    flash("Venue " + request.form["name"] + " was successfully listed!")
-    # TODO: on unsuccessful db insert, flash an error instead.
-    # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
-    # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
-    return render_template("pages/home.html")
+def create_venue_submission() -> FlaskResponse | str:
+    form = VenueForm()
+    ok = insert_venue(form)
+    if ok:
+        return render_template("pages/home.html")
+    return redirect(url_for("venue.create_venue_form"))
 
 
 @bp.route("/<venue_id>", methods=["DELETE"])
@@ -207,3 +209,46 @@ def get_venues() -> list[VenueResponseList]:
     ]
 
     return data
+
+
+def form_to_venue(form: VenueForm) -> VenueInForm | None:
+    if not form.validate_on_submit():
+        for error in form.errors.values():
+            for e in error:
+                flash(e, "error")
+        return None
+
+    try:
+        venue_in_form = VenueInForm.model_validate(form.data)
+    except ValidationError as e:
+        flash(str(e), "error")
+        return None
+
+    return venue_in_form
+
+
+def insert_venue(form: VenueForm) -> bool:
+    venue_in_form = form_to_venue(form)
+    if venue_in_form is None:
+        return False
+
+    venue = venue_in_form.to_orm(Venue)
+    venue.genres = Genre.genres_in_and_out_db(venue_in_form.genres)
+
+    ok: bool = True
+    try:
+        db.session.add(venue)
+        db.session.commit()
+
+        flash(f"Venue: {venue_in_form.name} was successfully listed!")
+
+    except Exception as e:
+        db.session.rollback()
+        ok = False
+
+        flash(str(e), "error")
+
+    finally:
+        db.session.close()
+
+    return ok
