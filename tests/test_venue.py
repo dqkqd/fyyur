@@ -1,8 +1,10 @@
 from flask import Flask
+from flask.testing import FlaskClient
 
 from fyyur.models import Venue, db
 from fyyur.routes.venue import get_venues
 from fyyur.schema.base import State
+from fyyur.schema.genre import GenreEnum
 from tests.mock import mock_venue
 
 
@@ -43,3 +45,20 @@ def test_get_venues(app: Flask) -> None:
         venues = get_venues()
         venues_data = [venue.model_dump() for venue in venues]
         assert expected_venues_data == venues_data
+
+
+def test_basic_insert_venue(app: Flask, client: FlaskClient) -> None:
+    venue = mock_venue(id=10, name="King Venue")
+    venue_in_form = venue.to_orm(Venue).venue_in_form
+    venue_in_form.genres = [GenreEnum.Blues, GenreEnum.Pop]
+    if not venue_in_form.seeking_talent:
+        data = venue_in_form.model_dump(exclude={"seeking_talent"})
+    else:
+        data = venue_in_form.model_dump()
+    response = client.post("/venues/create", json=data)
+    assert response.status_code == 200
+
+    with app.app_context():
+        venues: list[Venue] = Venue.query.filter_by(name="King Venue").all()
+        assert len(venues) == 1
+        assert venues[0].venue_in_form == venue_in_form
