@@ -226,13 +226,15 @@ def get_venues() -> list[VenueResponseList]:
     results: dict[VenueLocation, list[VenueResponse]] = {}
     venues: list[Venue] = Venue.query.order_by("id").all()
     for venue in venues:
-        location = VenueLocation.model_validate(venue)
+        location = VenueLocation(city=venue.city, state=venue.state)
         if location not in results:
             results[location] = []
         results[location].append(venue.venue_response)
 
     data: list[VenueResponseList] = [
-        VenueResponseList(**location.model_dump(), venues=venues_response)
+        VenueResponseList(
+            city=location.city, state=location.state, venues=venues_response
+        )
         for location, venues_response in results.items()
     ]
 

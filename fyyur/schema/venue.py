@@ -1,4 +1,5 @@
 from pydantic import HttpUrl, field_serializer
+from pydantic.dataclasses import dataclass
 
 from fyyur.schema.base import BaseSchema, State
 from fyyur.schema.genre import GenreEnum, GenreInDb
@@ -14,7 +15,8 @@ class VenueResponse(VenueBase):
     num_upcoming_shows: int
 
 
-class VenueLocation(BaseSchema):
+@dataclass(frozen=True)
+class VenueLocation:
     city: str
     state: str
 
