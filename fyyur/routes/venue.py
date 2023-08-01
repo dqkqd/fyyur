@@ -2,43 +2,15 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 from werkzeug.wrappers.response import Response as FlaskResponse
 
 from fyyur.forms import VenueForm
+from fyyur.models import Venue
+from fyyur.schema.venue import VenueLocation, VenueResponse, VenueResponseList
 
 bp = Blueprint("venue", __name__, url_prefix="/venues")
 
 
 @bp.route("/")
 def venues() -> str:
-    # TODO: replace with real venues data.
-    #       num_upcoming_shows should be aggregated based on number of upcoming shows per venue.
-    data = [
-        {
-            "city": "San Francisco",
-            "state": "CA",
-            "venues": [
-                {
-                    "id": 1,
-                    "name": "The Musical Hop",
-                    "num_upcoming_shows": 0,
-                },
-                {
-                    "id": 3,
-                    "name": "Park Square Live Music & Coffee",
-                    "num_upcoming_shows": 1,
-                },
-            ],
-        },
-        {
-            "city": "New York",
-            "state": "NY",
-            "venues": [
-                {
-                    "id": 2,
-                    "name": "The Dueling Pianos Bar",
-                    "num_upcoming_shows": 0,
-                }
-            ],
-        },
-    ]
+    data = [venue.model_dump(mode="json") for venue in get_venues()]
     return render_template("pages/venues.html", areas=data)
 
 
@@ -216,3 +188,52 @@ def edit_venue_submission(venue_id: int) -> FlaskResponse | str:
     # TODO: take values from the form submitted, and update existing
     # venue record with ID <venue_id> using the new attributes
     return redirect(url_for("show_venue", venue_id=venue_id))
+
+
+def get_venues() -> list[VenueResponseList]:
+    # TODO: replace with real venues data.
+    #       num_upcoming_shows should be aggregated based on number of upcoming shows per venue.
+    _data = [
+        {
+            "city": "San Francisco",
+            "state": "CA",
+            "venues": [
+                {
+                    "id": 1,
+                    "name": "The Musical Hop",
+                    "num_upcoming_shows": 0,
+                },
+                {
+                    "id": 3,
+                    "name": "Park Square Live Music & Coffee",
+                    "num_upcoming_shows": 1,
+                },
+            ],
+        },
+        {
+            "city": "New York",
+            "state": "NY",
+            "venues": [
+                {
+                    "id": 2,
+                    "name": "The Dueling Pianos Bar",
+                    "num_upcoming_shows": 0,
+                }
+            ],
+        },
+    ]
+
+    results: dict[VenueLocation, list[VenueResponse]] = {}
+    venues: list[Venue] = Venue.query.order_by("id").all()
+    for venue in venues:
+        location = VenueLocation.model_validate(venue)
+        if location not in results:
+            results[location] = []
+        results[location].append(venue.venue_response)
+
+    data: list[VenueResponseList] = [
+        VenueResponseList(**location.model_dump(), venues=venues_response)
+        for location, venues_response in results.items()
+    ]
+
+    return data

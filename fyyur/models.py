@@ -20,6 +20,7 @@ from fyyur.schema.artist import (
 )
 from fyyur.schema.genre import GenreBase, GenreEnum
 from fyyur.schema.show import ShowBase, ShowInArtistInfo, ShowInDb, ShowResponse
+from fyyur.schema.venue import VenueResponse
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -63,6 +64,28 @@ class Venue(db.Model):  # type: ignore
     )
 
     genres: Mapped[list["Genre"]] = relationship(secondary=venue_genre, lazy="subquery")
+
+    @hybrid_property
+    def upcoming_shows(self) -> list["Show"]:
+        return [show for show in self.shows if show.is_future]
+
+    @hybrid_property
+    def past_shows(self) -> list["Show"]:
+        return [show for show in self.shows if show.is_past]
+
+    @property
+    def upcoming_shows_count(self) -> int:
+        return len(self.upcoming_shows)
+
+    @property
+    def past_shows_count(self) -> int:
+        return len(self.past_shows)
+
+    @property
+    def venue_response(self) -> VenueResponse:
+        return VenueResponse(
+            id=self.id, name=self.name, num_upcoming_shows=self.upcoming_shows_count
+        )
 
 
 class Artist(db.Model):  # type: ignore
