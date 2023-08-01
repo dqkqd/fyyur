@@ -15,9 +15,27 @@ def mock_venue(
     address: str = "123",
 ) -> VenueInDb:
     name = name if name is not None else f"Venue{id}"
-    image_link = f"https://images.{name}.com"
+
+    phone = "326-123-5000"
+    name_in_link = name.replace(" ", "").lower()
+    image_link = f"https://images.{name_in_link}.com/"
+    website_link = f"https://{name_in_link}.com/"
+    facebook_link = f"https://www.facebook.com/{name_in_link}/"
+
+    seeking_description = f"{name} Looking artist."
+
     return VenueInDb(
-        id=id, name=name, image_link=image_link, address=address, city=city, state=state
+        id=id,
+        name=name,
+        city=city,
+        state=state,
+        phone=phone,
+        address=address,
+        image_link=image_link,
+        website_link=website_link,
+        facebook_link=facebook_link,
+        seeking_talent=True,  # put true here so we don't need to exclude or include
+        seeking_description=seeking_description,
     )
 
 
@@ -28,7 +46,6 @@ def mock_venues_db() -> list[Venue]:
 def mock_artist(
     id: int,
     name: str | None = None,
-    seeking_venue: bool = True,
 ) -> ArtistInDb:
     name = name if name is not None else f"Artist{id}"
 
@@ -52,7 +69,7 @@ def mock_artist(
         image_link=image_link,
         website_link=website_link,
         facebook_link=facebook_link,
-        seeking_venue=seeking_venue,
+        seeking_venue=True,  # put true here so we don't need to exclude or include
         seeking_description=seeking_description,
     )
 
