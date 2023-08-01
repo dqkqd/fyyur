@@ -1,0 +1,44 @@
+repos:
+  - repo: local
+    hooks:
+      - id: check-db-migration
+        name: Check database migration
+        language: python
+        entry: python -m scripts.check_db_migration
+        files: fyyur/models.py
+        additional_dependencies:
+          - babel
+          - flask
+          - flask_migrate
+          - flask-moment
+          - flask_sqlalchemy
+          - flask-wtf
+          - phonenumbers
+          - psycopg2
+          - pydantic
+          - python-dateutil
+
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.0.281
+    hooks:
+      - id: ruff
+        exclude: "fyyur/routes/venue.py"
+        args: [--fix]
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: "v1.4.1"
+    hooks:
+      - id: mypy
+        args: [--config-file=pyproject.toml]
+        exclude: "migrations|fabfile.py"
+        additional_dependencies:
+          - flask
+          - sqlalchemy[mypy]
+          - pydantic
+          - types-python-dateutil
+          - babel
+
+  - repo: https://github.com/psf/black
+    rev: 23.7.0
+    hooks:
+      - id: black

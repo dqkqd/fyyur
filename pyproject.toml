@@ -45,5 +45,6 @@ addopts = "-vvv"
 [tool.mypy]
 strict = true
 ignore_missing_imports = true
+allow_untyped_decorators = true
 plugins = ["sqlalchemy.ext.mypy.plugin", "pydantic.mypy"]
 exclude = [".venv/", "build/", "migrations/", "fabfile.py"]
