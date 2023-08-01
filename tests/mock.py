@@ -9,7 +9,13 @@ from tests.utils import date_future_str, date_past_str
 def mock_venue(id: int, name: str | None = None) -> VenueInDb:
     name = name if name is not None else f"Venue{id}"
     image_link = f"https://images.{name}.com"
-    return VenueInDb(id=id, name=name, image_link=image_link)
+
+    city = "San Francisco"
+    state = "CA"
+    address = "123"
+    return VenueInDb(
+        id=id, name=name, image_link=image_link, address=address, city=city, state=state
+    )
 
 
 def mock_venues_db() -> list[Venue]:
