@@ -18,8 +18,8 @@ class ArtistSearchResponse(ArtistResponse):
 
 
 class ArtistInfo(ArtistBase):
-    city: str | None = None
-    state: State | None = None
+    city: str
+    state: State
     phone: str | None = None
 
     image_link: HttpUrl | None = None
