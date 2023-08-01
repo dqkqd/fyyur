@@ -1,18 +1,21 @@
 from fyyur.models import Artist, Genre, Show, Venue, db
 from fyyur.schema.artist import ArtistInDb
+from fyyur.schema.base import State
 from fyyur.schema.genre import GenreEnum, GenreInDb
 from fyyur.schema.show import ShowInDb
 from fyyur.schema.venue import VenueInDb
 from tests.utils import date_future_str, date_past_str
 
 
-def mock_venue(id: int, name: str | None = None) -> VenueInDb:
+def mock_venue(
+    id: int,
+    name: str | None = None,
+    city: str = "San Francisco",
+    state: State = State.CA,
+    address: str = "123",
+) -> VenueInDb:
     name = name if name is not None else f"Venue{id}"
     image_link = f"https://images.{name}.com"
-
-    city = "San Francisco"
-    state = "CA"
-    address = "123"
     return VenueInDb(
         id=id, name=name, image_link=image_link, address=address, city=city, state=state
     )
