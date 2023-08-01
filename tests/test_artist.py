@@ -227,7 +227,7 @@ def test_show_artist(client: FlaskClient) -> None:
 
 
 def test_basic_insert_artist(app: Flask, client: FlaskClient) -> None:
-    artist = mock_artist(id=10, name="King", seeking_venue=True)
+    artist = mock_artist(id=10, name="King")
     artist_in_form = artist.to_orm(Artist).artist_in_form
     artist_in_form.genres = [GenreEnum.Blues, GenreEnum.Pop]
     response = client.post("/artists/create", data=artist_in_form.model_dump())
@@ -240,7 +240,7 @@ def test_basic_insert_artist(app: Flask, client: FlaskClient) -> None:
 
 
 def test_insert_artist_should_insert_genre(app: Flask, client: FlaskClient) -> None:
-    artist = mock_artist(id=10, name="King", seeking_venue=True)
+    artist = mock_artist(id=10, name="King")
     artist_in_form = artist.to_orm(Artist).artist_in_form
     artist_in_form.genres = [GenreEnum.Folk]
 
@@ -258,7 +258,7 @@ def test_insert_artist_should_insert_genre(app: Flask, client: FlaskClient) -> N
 def test_insert_artist_should_not_insert_duplicated_genres(
     app: Flask, client: FlaskClient
 ) -> None:
-    artist = mock_artist(id=10, name="King", seeking_venue=True)
+    artist = mock_artist(id=10, name="King")
     artist_in_form = artist.to_orm(Artist).artist_in_form
     artist_in_form.genres = [GenreEnum.Folk]
     response = client.post("/artists/create", data=artist_in_form.model_dump())
@@ -270,7 +270,7 @@ def test_insert_artist_should_not_insert_duplicated_genres(
         assert king.genres[0].name == GenreEnum.Folk.value
         assert Genre.query.filter_by(name=GenreEnum.Folk.value).count() == 1
 
-    artist = mock_artist(id=20, name="Queen", seeking_venue=True)
+    artist = mock_artist(id=20, name="Queen")
     artist_in_form = artist.to_orm(Artist).artist_in_form
     artist_in_form.genres = [GenreEnum.Folk]
     response = client.post("/artists/create", data=artist_in_form.model_dump())
