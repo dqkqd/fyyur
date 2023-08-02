@@ -1,4 +1,13 @@
-from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
+from flask import (
+    Blueprint,
+    abort,
+    flash,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
 from pydantic import ValidationError
 from werkzeug.wrappers.response import Response as FlaskResponse
 
@@ -65,7 +74,7 @@ def create_venue_submission() -> FlaskResponse | str:
     return redirect(url_for("venue.create_venue_form"))
 
 
-@bp.route("/<venue_id>", methods=["DELETE"])
+@bp.route("/<int:venue_id>", methods=["DELETE"])
 def delete_venue(venue_id: int) -> FlaskResponse | str:
     venue: Venue | None = Venue.query.filter_by(id=venue_id).first()
     if venue is None:
@@ -87,10 +96,7 @@ def delete_venue(venue_id: int) -> FlaskResponse | str:
     finally:
         db.session.close()
 
-    if not ok:
-        return redirect(url_for("venue.venues"))
-
-    return render_template("pages/home.html")
+    return jsonify({"success": ok})
 
 
 @bp.route("/<int:venue_id>/edit", methods=["GET"])

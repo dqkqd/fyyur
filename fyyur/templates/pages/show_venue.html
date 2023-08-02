@@ -74,6 +74,20 @@
   </div>
 </section>
 
-<a href="/venues/{{ venue.id }}/edit"><button class="btn btn-primary btn-lg">Edit</button></a>
+<a href="/venues/{{ venue.id }}/edit">
+  <button class="btn btn-primary btn-lg" style="margin-right: 10px">Edit</button>
+</a>
+
+<button id="delete-venue-button" class="btn btn-primary btn-lg">Delete</button>
+
+<script>
+  const delete_button = (document.getElementById("delete-venue-button").onclick = function () {
+    fetch("/venues/{{ venue.id }}", {
+      method: "DELETE",
+    }).then((r) => {
+      window.location.replace("/");
+    });
+  });
+</script>
 
 {% endblock %}
