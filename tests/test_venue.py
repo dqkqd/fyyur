@@ -5,10 +5,12 @@ from flask import Flask
 from flask.testing import FlaskClient
 
 from fyyur.models import Show, Venue, db
-from fyyur.routes.venue import find_venues, get_venues
+from fyyur.routes.venue import find_venues, get_venue_info, get_venues
 from fyyur.schema.base import SearchSchema, State
 from fyyur.schema.genre import GenreEnum
+from fyyur.schema.venue import VenueInfoResponse
 from tests.mock import mock_show, mock_venue
+from tests.utils import date_future, date_past
 
 
 def test_get_venues(app: Flask) -> None:
@@ -120,3 +122,121 @@ def test_find_venues_with_past_shows(app: Flask) -> None:
         venues = find_venues(SearchSchema(search_term="King"))
         venues_data = [venue.model_dump() for venue in venues]
         assert venues_data == [{"id": 10, "name": "King", "num_upcoming_shows": 1}]
+
+
+@pytest.mark.parametrize(
+    "venue_id, expected_venue_data",
+    [
+        (
+            1,
+            {
+                "id": 1,
+                "name": "Venue1",
+                "genres": ["Blues", "Hip-Hop", "Jazz"],
+                "address": "123",
+                "city": "San Francisco",
+                "state": "CA",
+                "phone": "326-123-5000",
+                "image_link": "https://images.venue1.com/",
+                "website_link": "https://venue1.com/",
+                "facebook_link": "https://www.facebook.com/venue1/",
+                "seeking_talent": True,
+                "seeking_description": "Venue1: looking for artist.",
+                "past_shows": [],
+                "upcoming_shows": [
+                    {
+                        "artist_id": 1,
+                        "artist_name": "Artist1",
+                        "artist_image_link": "https://images.artist1.com/",
+                        "start_time": date_future(1),
+                    },
+                    {
+                        "artist_id": 1,
+                        "artist_name": "Artist1",
+                        "artist_image_link": "https://images.artist1.com/",
+                        "start_time": date_future(2),
+                    },
+                    {
+                        "artist_id": 3,
+                        "artist_name": "Artist3",
+                        "artist_image_link": "https://images.artist3.com/",
+                        "start_time": date_future(4),
+                    },
+                ],
+                "past_shows_count": 0,
+                "upcoming_shows_count": 3,
+            },
+        ),
+        (
+            2,
+            {
+                "id": 2,
+                "name": "Venue2",
+                "genres": ["Jazz", "Rock n Roll", "Pop"],
+                "address": "123",
+                "city": "San Francisco",
+                "state": "CA",
+                "phone": "326-123-5000",
+                "image_link": "https://images.venue2.com/",
+                "website_link": "https://venue2.com/",
+                "facebook_link": "https://www.facebook.com/venue2/",
+                "seeking_talent": True,
+                "seeking_description": "Venue2: looking for artist.",
+                "past_shows": [
+                    {
+                        "artist_id": 4,
+                        "artist_name": "Artist4",
+                        "artist_image_link": "https://images.artist4.com/",
+                        "start_time": date_past(4),
+                    },
+                ],
+                "upcoming_shows": [
+                    {
+                        "artist_id": 2,
+                        "artist_name": "Artist2",
+                        "artist_image_link": "https://images.artist2.com/",
+                        "start_time": date_future(3),
+                    },
+                ],
+                "past_shows_count": 1,
+                "upcoming_shows_count": 1,
+            },
+        ),
+        (
+            3,
+            {
+                "id": 3,
+                "name": "Venue3",
+                "genres": ["Pop"],
+                "address": "123",
+                "city": "San Francisco",
+                "state": "CA",
+                "phone": "326-123-5000",
+                "image_link": "https://images.venue3.com/",
+                "website_link": "https://venue3.com/",
+                "facebook_link": "https://www.facebook.com/venue3/",
+                "seeking_talent": True,
+                "seeking_description": "Venue3: looking for artist.",
+                "past_shows": [],
+                "upcoming_shows": [],
+                "past_shows_count": 0,
+                "upcoming_shows_count": 0,
+            },
+        ),
+        (100, None),
+    ],
+)
+def test_get_venue_info(
+    app: Flask, venue_id: int, expected_venue_data: dict[str, Any] | None
+) -> None:
+    with app.app_context():
+        venue_info_response = get_venue_info(venue_id=venue_id)
+        if expected_venue_data is not None:
+            assert isinstance(venue_info_response, VenueInfoResponse)
+            assert expected_venue_data == venue_info_response.model_dump()
+            assert (
+                VenueInfoResponse.model_validate(expected_venue_data)
+                == venue_info_response
+            )
+        else:
+            assert venue_info_response is None

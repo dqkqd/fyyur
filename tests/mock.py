@@ -22,7 +22,7 @@ def mock_venue(
     website_link = f"https://{name_in_link}.com/"
     facebook_link = f"https://www.facebook.com/{name_in_link}/"
 
-    seeking_description = f"{name} Looking artist."
+    seeking_description = f"{name}: looking for artist."
 
     return VenueInDb(
         id=id,
@@ -129,6 +129,19 @@ def insert_mock_data() -> None:
 
     # artist3: pop
     artists[2].genres.append(genres[4])
+
+    # venue1: blues, hiphop, jazz
+    venues[0].genres.append(genres[0])
+    venues[0].genres.append(genres[1])
+    venues[0].genres.append(genres[2])
+
+    # venue2: jazz, rock n roll, pop
+    venues[1].genres.append(genres[2])
+    venues[1].genres.append(genres[3])
+    venues[1].genres.append(genres[4])
+
+    # venue3: pop
+    venues[2].genres.append(genres[4])
 
     for object in [*venues, *artists, *shows, *genres]:
         db.session.add(object)

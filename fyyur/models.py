@@ -19,8 +19,14 @@ from fyyur.schema.artist import (
     ArtistSearchResponse,
 )
 from fyyur.schema.genre import GenreBase, GenreEnum
-from fyyur.schema.show import ShowBase, ShowInArtistInfo, ShowInDb, ShowResponse
-from fyyur.schema.venue import VenueInfo, VenueInForm, VenueResponse
+from fyyur.schema.show import (
+    ShowBase,
+    ShowInArtistInfo,
+    ShowInDb,
+    ShowInVenueInfo,
+    ShowResponse,
+)
+from fyyur.schema.venue import VenueInfo, VenueInfoResponse, VenueInForm, VenueResponse
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -96,6 +102,17 @@ class Venue(db.Model):  # type: ignore
         genres = [genre.genre_base for genre in self.genres]
         return VenueInForm(
             **self.venue_info.model_dump(), genres=[genre.name for genre in genres]
+        )
+
+    @property
+    def venue_info_response(self) -> VenueInfoResponse:
+        return VenueInfoResponse(
+            id=self.id,
+            **self.venue_in_form.model_dump(),
+            upcoming_shows=[show.show_in_venue_info for show in self.upcoming_shows],
+            past_shows=[show.show_in_venue_info for show in self.past_shows],
+            upcoming_shows_count=self.upcoming_shows_count,
+            past_shows_count=self.past_shows_count,
         )
 
 
@@ -259,5 +276,14 @@ class Show(db.Model):  # type: ignore
             venue_id=self.venue_id,
             venue_name=self.venue.name,
             venue_image_link=self.venue.image_link,
+            start_time=self.start_time,
+        )
+
+    @property
+    def show_in_venue_info(self) -> ShowInVenueInfo:
+        return ShowInVenueInfo(
+            artist_id=self.artist_id,
+            artist_name=self.artist.name,
+            artist_image_link=self.artist.image_link,
             start_time=self.start_time,
         )
