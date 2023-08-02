@@ -296,7 +296,7 @@ def test_update_artist_basic(app: Flask, client: FlaskClient) -> None:
         artist: Artist | None = Artist.query.filter_by(id=1).first()
         assert artist is not None
 
-        # Fold doesn't exist
+        # Folk doesn't exist
         for genre in artist.genres:
             assert genre.name != GenreEnum.Folk.value
 
