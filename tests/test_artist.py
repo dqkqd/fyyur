@@ -331,3 +331,11 @@ def test_update_non_existing_artist(app: Flask, client: FlaskClient) -> None:
         updated_artist: Artist | None = Artist.query.filter_by(id=1).first()
         assert updated_artist is not None
         assert updated_artist.artist_in_form != artist_in_form
+
+
+def test_edit_artist_request(client: FlaskClient) -> None:
+    response = client.get("/artists/1/edit")
+    assert response.status_code == 200
+
+    response = client.get("/artists/100/edit")
+    assert response.status_code == 404
