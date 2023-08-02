@@ -77,30 +77,26 @@ def delete_venue(venue_id: int) -> str:
 
 @bp.route("/<int:venue_id>/edit", methods=["GET"])
 def edit_venue(venue_id: int) -> str:
-    form = VenueForm()
-    venue = {
-        "id": 1,
-        "name": "The Musical Hop",
-        "genres": ["Jazz", "Reggae", "Swing", "Classical", "Folk"],
-        "address": "1015 Folsom Street",
-        "city": "San Francisco",
-        "state": "CA",
-        "phone": "123-123-1234",
-        "website_link": "https://www.themusicalhop.com",
-        "facebook_link": "https://www.facebook.com/TheMusicalHop",
-        "seeking_talent": True,
-        "seeking_description": "We are on the lookout for a local artist to play every two weeks. Please call us.",
-        "image_link": "https://images.unsplash.com/photo-1543900694-133f37abaaa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60",
-    }
-    # TODO: populate form with values from venue with ID <venue_id>
-    return render_template("forms/edit_venue.html", form=form, venue=venue)
+    venue = get_venue_info(venue_id)
+    if venue is None:
+        abort(404)
+    form = VenueForm(**venue.model_dump())
+    return render_template(
+        "forms/edit_venue.html",
+        form=form,
+        venue=VenueResponse.model_validate(venue).model_dump(
+            exclude={"num_upcoming_shows"}
+        ),
+    )
 
 
 @bp.route("/<int:venue_id>/edit", methods=["POST"])
 def edit_venue_submission(venue_id: int) -> FlaskResponse | str:
-    # TODO: take values from the form submitted, and update existing
-    # venue record with ID <venue_id> using the new attributes
-    return redirect(url_for("show_venue", venue_id=venue_id))
+    form = VenueForm()
+    ok = update_venue(form, venue_id)
+    if ok:
+        return redirect(url_for("venue.show_venue", venue_id=venue_id))
+    return redirect(url_for("venue.edit_venue", venue_id=venue_id))
 
 
 def get_venues() -> list[VenueResponseList]:
@@ -166,6 +162,39 @@ def insert_venue(form: VenueForm) -> bool:
         db.session.commit()
 
         flash(f"Venue: {venue_in_form.name} was successfully listed!")
+
+    except Exception as e:
+        db.session.rollback()
+        ok = False
+
+        flash(str(e), "error")
+
+    finally:
+        db.session.close()
+
+    return ok
+
+
+def update_venue(form: VenueForm, venue_id: int) -> bool:
+    venue_in_form = form_to_venue(form)
+    if venue_in_form is None:
+        return False
+
+    venue = Venue.query.filter_by(id=venue_id).first()
+
+    if venue is None:
+        flash("venue doesn't exist")
+        return False
+
+    for key, value in venue_in_form.model_dump(exclude={"genres"}).items():
+        setattr(venue, key, value)
+    venue.genres = Genre.genres_in_and_out_db(venue_in_form.genres)
+
+    ok: bool = True
+    try:
+        db.session.commit()
+
+        flash(f"Venue ID: {venue_id} was successfully edited!")
 
     except Exception as e:
         db.session.rollback()

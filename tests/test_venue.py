@@ -240,3 +240,45 @@ def test_get_venue_info(
             )
         else:
             assert venue_info_response is None
+
+
+def test_update_venue_basic(app: Flask, client: FlaskClient) -> None:
+    with app.app_context():
+        venue: Venue | None = Venue.query.filter_by(id=1).first()
+        assert venue is not None
+
+        # Folk doesn't exist
+        for genre in venue.genres:
+            assert genre.name != GenreEnum.Folk.value
+
+        venue_in_form = venue.venue_in_form
+
+        new_genres = [GenreEnum.Folk]
+        assert venue_in_form.genres != new_genres
+        venue_in_form.genres = new_genres
+
+    client.post("/venues/1/edit", data=venue_in_form.model_dump(mode="json"))
+
+    with app.app_context():
+        updated_venue: Venue | None = venue.query.filter_by(id=1).first()
+        assert updated_venue is not None
+
+        # Folk exist now
+        assert len(updated_venue.genres) == 1
+        assert updated_venue.genres[0].name == GenreEnum.Folk.value
+
+
+def test_update_non_existing_venue(app: Flask, client: FlaskClient) -> None:
+    with app.app_context():
+        venue: Venue | None = Venue.query.filter_by(id=1).first()
+        assert venue is not None
+        venue_in_form = venue.venue_in_form
+        venue_in_form.name = "King"
+
+    client.post("/venues/100/edit", data=venue_in_form.model_dump(mode="json"))
+
+    with app.app_context():
+        assert venue.query.filter_by(id=100).first() is None
+        updated_venue: Venue | None = venue.query.filter_by(id=1).first()
+        assert updated_venue is not None
+        assert updated_venue.venue_in_form != venue_in_form
