@@ -4,11 +4,11 @@ import pytest
 from flask import Flask
 from flask.testing import FlaskClient
 
-from fyyur.models import Venue, db
+from fyyur.models import Show, Venue, db
 from fyyur.routes.venue import find_venues, get_venues
 from fyyur.schema.base import SearchSchema, State
 from fyyur.schema.genre import GenreEnum
-from tests.mock import mock_venue
+from tests.mock import mock_show, mock_venue
 
 
 def test_get_venues(app: Flask) -> None:
@@ -97,3 +97,26 @@ def test_basic_find_venues(
 
     response = client.post("/venues/search", data=search_schema.model_dump())
     assert response.status_code == 200
+
+
+def test_find_venues_case_insensitive(app: Flask) -> None:
+    with app.app_context():
+        db.session.add(mock_venue(id=10, name="King").to_orm(Venue))
+        db.session.commit()
+
+        for search_term in ["k", "K", "IN"]:
+            venues = find_venues(SearchSchema(search_term=search_term))
+            venues_data = [venue.model_dump() for venue in venues]
+            assert venues_data == [{"id": 10, "name": "King", "num_upcoming_shows": 0}]
+
+
+def test_find_venues_with_past_shows(app: Flask) -> None:
+    with app.app_context():
+        db.session.add(mock_venue(id=10, name="King").to_orm(Venue))
+        db.session.add(mock_show(venue_id=10, artist_id=1, day_offset=-100).to_orm(Show))
+        db.session.add(mock_show(venue_id=10, artist_id=1, day_offset=100).to_orm(Show))
+        db.session.commit()
+
+        venues = find_venues(SearchSchema(search_term="King"))
+        venues_data = [venue.model_dump() for venue in venues]
+        assert venues_data == [{"id": 10, "name": "King", "num_upcoming_shows": 1}]
