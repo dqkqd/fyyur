@@ -15,6 +15,7 @@ from fyyur.forms import VenueForm
 from fyyur.models import Genre, Venue, db
 from fyyur.schema.base import SearchSchema
 from fyyur.schema.venue import (
+    VenueEditReponse,
     VenueInfoResponse,
     VenueInForm,
     VenueLocation,
@@ -108,9 +109,7 @@ def edit_venue(venue_id: int) -> str:
     return render_template(
         "forms/edit_venue.html",
         form=form,
-        venue=VenueResponse.model_validate(venue).model_dump(
-            exclude={"num_upcoming_shows"}
-        ),
+        venue=VenueEditReponse(id=venue_id, name=venue.name),
     )
 
 

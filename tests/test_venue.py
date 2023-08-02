@@ -289,3 +289,11 @@ def test_delete_venue(app: Flask, client: FlaskClient) -> None:
         assert Venue.query.filter_by(id=1).first() is not None
         client.delete("/venues/1")
         assert Venue.query.filter_by(id=1).first() is None
+
+
+def test_edit_venue_request(client: FlaskClient) -> None:
+    response = client.get("/venues/1/edit")
+    assert response.status_code == 200
+
+    response = client.get("/venues/100/edit")
+    assert response.status_code == 404

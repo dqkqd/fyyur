@@ -15,6 +15,10 @@ class VenueResponse(VenueBase):
     num_upcoming_shows: int
 
 
+class VenueEditReponse(VenueBase):
+    id: int
+
+
 @dataclass(frozen=True)
 class VenueLocation:
     city: str
