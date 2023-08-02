@@ -66,13 +66,31 @@ def create_venue_submission() -> FlaskResponse | str:
 
 
 @bp.route("/<venue_id>", methods=["DELETE"])
-def delete_venue(venue_id: int) -> str:
-    # TODO: Complete this endpoint for taking a venue_id, and using
-    # SQLAlchemy ORM to delete a record. Handle cases where the session commit could fail.
+def delete_venue(venue_id: int) -> FlaskResponse | str:
+    venue: Venue | None = Venue.query.filter_by(id=venue_id).first()
+    if venue is None:
+        abort(404)
 
-    # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
-    # clicking that button delete it from the db then redirect the user to the homepage
-    raise NotImplementedError
+    ok: bool = True
+    try:
+        db.session.delete(venue)
+        db.session.commit()
+
+        flash(f"Venue ID: {venue_id} was successfully deleted!")
+
+    except Exception as e:
+        db.session.rollback()
+        ok = False
+
+        flash(str(e), "error")
+
+    finally:
+        db.session.close()
+
+    if not ok:
+        return redirect(url_for("venue.venues"))
+
+    return render_template("pages/home.html")
 
 
 @bp.route("/<int:venue_id>/edit", methods=["GET"])

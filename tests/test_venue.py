@@ -282,3 +282,10 @@ def test_update_non_existing_venue(app: Flask, client: FlaskClient) -> None:
         updated_venue: Venue | None = venue.query.filter_by(id=1).first()
         assert updated_venue is not None
         assert updated_venue.venue_in_form != venue_in_form
+
+
+def test_delete_venue(app: Flask, client: FlaskClient) -> None:
+    with app.app_context():
+        assert Venue.query.filter_by(id=1).first() is not None
+        client.delete("/venues/1")
+        assert Venue.query.filter_by(id=1).first() is None
