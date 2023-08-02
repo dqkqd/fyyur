@@ -6,7 +6,7 @@ from fyyur.schema.show import ShowInArtistInfo, ShowInDb
 
 
 class ArtistBase(BaseSchema):
-    name: str | None = None
+    name: str
 
 
 class ArtistResponse(ArtistBase):
@@ -41,7 +41,7 @@ class ArtistInfo(ArtistBase):
 
 
 class ArtistInForm(ArtistInfo):
-    genres: list[GenreEnum] = []
+    genres: list[GenreEnum]
 
 
 class ArtistInDb(ArtistInfo):
@@ -52,7 +52,7 @@ class ArtistInDb(ArtistInfo):
 
 class ArtistInfoResponse(ArtistInForm):
     id: int
-    past_shows: list[ShowInArtistInfo]
-    upcoming_shows: list[ShowInArtistInfo]
-    past_shows_count: int
-    upcoming_shows_count: int
+    past_shows: list[ShowInArtistInfo] = []
+    upcoming_shows: list[ShowInArtistInfo] = []
+    past_shows_count: int = 0
+    upcoming_shows_count: int = 0

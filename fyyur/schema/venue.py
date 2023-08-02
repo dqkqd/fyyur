@@ -67,7 +67,7 @@ class VenueInDb(VenueInfo):
 
 class VenueInfoResponse(VenueInForm):
     id: int
-    past_shows: list[ShowInVenueInfo]
-    upcoming_shows: list[ShowInVenueInfo]
-    past_shows_count: int
-    upcoming_shows_count: int
+    past_shows: list[ShowInVenueInfo] = []
+    upcoming_shows: list[ShowInVenueInfo] = []
+    past_shows_count: int = 0
+    upcoming_shows_count: int = 0
