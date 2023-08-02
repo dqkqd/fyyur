@@ -52,10 +52,9 @@ class Venue(db.Model):  # type: ignore
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str]
 
-    # TODO: remove nullable if possible
-    city: Mapped[str] = mapped_column(sa.String(120), nullable=True)
-    state: Mapped[str] = mapped_column(sa.String(120), nullable=True)
-    address: Mapped[str] = mapped_column(sa.String(120), nullable=True)
+    city: Mapped[str] = mapped_column(sa.String(120))
+    state: Mapped[str] = mapped_column(sa.String(120))
+    address: Mapped[str] = mapped_column(sa.String(120))
     phone: Mapped[str] = mapped_column(sa.String(120), nullable=True)
 
     image_link: Mapped[str] = mapped_column(sa.String(500), nullable=True)
@@ -122,9 +121,8 @@ class Artist(db.Model):  # type: ignore
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str]
 
-    # TODO: remove nullable if possible
-    city: Mapped[str] = mapped_column(sa.String(120), nullable=True)
-    state: Mapped[str] = mapped_column(sa.String(120), nullable=True)
+    city: Mapped[str] = mapped_column(sa.String(120))
+    state: Mapped[str] = mapped_column(sa.String(120))
     phone: Mapped[str] = mapped_column(sa.String(120), nullable=True)
 
     image_link: Mapped[str] = mapped_column(sa.String(500), nullable=True)
@@ -132,7 +130,7 @@ class Artist(db.Model):  # type: ignore
     website_link: Mapped[str] = mapped_column(sa.String(120), nullable=True)
 
     seeking_venue: Mapped[bool] = mapped_column(default=False)
-    seeking_description: Mapped[str] = mapped_column(sa.String, nullable=True)
+    seeking_description: Mapped[str] = mapped_column(nullable=True)
 
     shows: Mapped[list["Show"]] = relationship(
         back_populates="artist", lazy=True, cascade="all, delete-orphan"
