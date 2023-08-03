@@ -61,6 +61,8 @@ class Venue(db.Model):  # type: ignore
     facebook_link: Mapped[str] = mapped_column(sa.String(120), nullable=True)
     website_link: Mapped[str] = mapped_column(sa.String(120), nullable=True)
 
+    create_date: Mapped[datetime] = mapped_column(default=sa.func.now())
+
     seeking_talent: Mapped[bool] = mapped_column(default=False)
     seeking_description: Mapped[str] = mapped_column(nullable=True)
 
@@ -131,6 +133,8 @@ class Artist(db.Model):  # type: ignore
 
     seeking_venue: Mapped[bool] = mapped_column(default=False)
     seeking_description: Mapped[str] = mapped_column(nullable=True)
+
+    create_date: Mapped[datetime] = mapped_column(default=sa.func.now())
 
     shows: Mapped[list["Show"]] = relationship(
         back_populates="artist", lazy=True, cascade="all, delete-orphan"
