@@ -1,3 +1,4 @@
+import sqlalchemy as sa
 from flask import (
     Blueprint,
     abort,
@@ -142,8 +143,12 @@ def get_venues() -> list[VenueResponseList]:
 
 
 def find_venues(search: SearchSchema) -> list[VenueResponse]:
+    search_term = f"%{search.search_term}%"
     venues: list[Venue] = Venue.query.filter(
-        Venue.name.ilike(f"%{search.search_term}%")
+        sa.or_(
+            Venue.name.ilike(search_term),
+            (Venue.city + ", " + Venue.state).ilike(search_term),
+        )
     ).all()
     return [venue.venue_response for venue in venues]
 
