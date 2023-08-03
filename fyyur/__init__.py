@@ -9,6 +9,8 @@ from flask_moment import Moment
 
 from fyyur.config import Config, NormalConfig
 from fyyur.models import Artist, Venue
+from fyyur.schema.artist import ArtistResponse
+from fyyur.schema.venue import VenueResponse
 
 # ----------------------------------------------------------------------------#
 # Filters.
@@ -52,8 +54,14 @@ def create_app(config_object: type[Config] = NormalConfig) -> Flask:
 
     @app.route("/")
     def index() -> str:
-        recent_venues = Venue.query.all()
-        recent_artists = Artist.query.all()
+        recent_venues = [
+            VenueResponse.model_validate(venue)
+            for venue in Venue.query.order_by(Venue.create_date).limit(10).all()
+        ]
+        recent_artists = [
+            ArtistResponse.model_validate(artist)
+            for artist in Artist.query.order_by(Artist.create_date).limit(10).all()
+        ]
         return render_template(
             "pages/home.html", recent_venues=recent_venues, recent_artists=recent_artists
         )

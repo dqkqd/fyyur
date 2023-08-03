@@ -12,7 +12,7 @@ class VenueBase(BaseSchema):
 
 class VenueResponse(VenueBase):
     id: int
-    num_upcoming_shows: int
+    num_upcoming_shows: int | None = None
 
 
 class VenueEditReponse(VenueBase):
