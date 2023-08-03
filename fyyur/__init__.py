@@ -8,6 +8,7 @@ from flask import Flask, render_template
 from flask_moment import Moment
 
 from fyyur.config import Config, NormalConfig
+from fyyur.models import Artist, Venue
 
 # ----------------------------------------------------------------------------#
 # Filters.
@@ -51,7 +52,11 @@ def create_app(config_object: type[Config] = NormalConfig) -> Flask:
 
     @app.route("/")
     def index() -> str:
-        return render_template("pages/home.html")
+        recent_venues = Venue.query.all()
+        recent_artists = Artist.query.all()
+        return render_template(
+            "pages/home.html", recent_venues=recent_venues, recent_artists=recent_artists
+        )
 
     @app.errorhandler(404)
     def not_found_error(error: Any) -> tuple[str, int]:
