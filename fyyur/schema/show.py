@@ -13,7 +13,7 @@ class ShowBase(BaseSchema):
 
 
 class ShowInDb(ShowBase):
-    id: Optional[int]
+    id: Optional[int] = None
 
 
 class ShowInForm(ShowBase):
