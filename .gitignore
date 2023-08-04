@@ -11,3 +11,4 @@ error.log
 node_modules/
 .dmypy.json
 .github/
+.tox/

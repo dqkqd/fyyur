@@ -24,6 +24,7 @@ dev = [
     "ruff",
     "sqlalchemy[mypy]",
     "types-python-dateutil",
+    "tox",
 ]
 
 [tool.ruff]
