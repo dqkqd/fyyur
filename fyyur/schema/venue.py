@@ -58,6 +58,10 @@ class VenueInfo(VenueBase):
 class VenueInForm(VenueInfo):
     genres: list[GenreEnum]
 
+    @field_serializer("genres")
+    def serialize_genres(self, genres: list[GenreEnum]) -> list[str] | None:
+        return [genre.value for genre in genres]
+
 
 class VenueInDb(VenueInfo):
     id: int

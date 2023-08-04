@@ -43,6 +43,10 @@ class ArtistInfo(ArtistBase):
 class ArtistInForm(ArtistInfo):
     genres: list[GenreEnum]
 
+    @field_serializer("genres")
+    def serialize_genres(self, genres: list[GenreEnum]) -> list[str] | None:
+        return [genre.value for genre in genres]
+
 
 class ArtistInDb(ArtistInfo):
     id: int
