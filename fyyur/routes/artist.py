@@ -1,3 +1,5 @@
+from typing import Optional, Union
+
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 from pydantic import ValidationError
 from werkzeug.wrappers.response import Response as FlaskResponse
@@ -80,7 +82,7 @@ def create_artist_form() -> str:
 
 
 @bp.route("/create", methods=["POST"])
-def create_artist_submission() -> FlaskResponse | str:
+def create_artist_submission() -> Union[FlaskResponse, str]:
     form = ArtistForm()
     ok = insert_artist(form)
     if ok:
@@ -100,14 +102,14 @@ def find_artists(search: SearchSchema) -> list[ArtistSearchResponse]:
     return [artist.artist_search_response for artist in artists]
 
 
-def get_artist_info(artist_id: int) -> ArtistInfoResponse | None:
+def get_artist_info(artist_id: int) -> Optional[ArtistInfoResponse]:
     artist: Artist = Artist.query.filter_by(id=artist_id).first()
     if artist is None:
         return None
     return artist.artist_info_response
 
 
-def form_to_artist(form: ArtistForm) -> ArtistInForm | None:
+def form_to_artist(form: ArtistForm) -> Optional[ArtistInForm]:
     if not form.validate_on_submit():
         for error in form.errors.values():
             for e in error:

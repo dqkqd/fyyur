@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Optional
 
 from pydantic import field_serializer
 from typing_extensions import Self
@@ -45,4 +46,4 @@ class GenreBase(BaseSchema):
 
 
 class GenreInDb(GenreBase):
-    id: int | None = None
+    id: Optional[int]

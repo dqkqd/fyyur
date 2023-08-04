@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fyyur.models import Artist, Genre, Show, Venue, db
 from fyyur.schema.artist import ArtistInDb
 from fyyur.schema.base import State
@@ -9,7 +11,7 @@ from tests.utils import date_future_str, date_past_str
 
 def mock_venue(
     id: int,
-    name: str | None = None,
+    name: Optional[str] = None,
     city: str = "San Francisco",
     state: State = State.CA,
     address: str = "123",
@@ -45,7 +47,7 @@ def mock_venues_db() -> list[Venue]:
 
 def mock_artist(
     id: int,
-    name: str | None = None,
+    name: Optional[str] = None,
 ) -> ArtistInDb:
     name = name if name is not None else f"Artist{id}"
 
@@ -79,7 +81,7 @@ def mock_artists_db() -> list[Artist]:
 
 
 def mock_show(
-    venue_id: int, artist_id: int, day_offset: int, id: int | None = None
+    venue_id: int, artist_id: int, day_offset: int, id: Optional[int] = None
 ) -> ShowInDb:
     start_time = (
         date_future_str(day_offset) if day_offset > 0 else date_past_str(-day_offset)
@@ -97,7 +99,7 @@ def mock_shows_db() -> list[Show]:
     ]
 
 
-def mock_genre(id: int | None, genre: GenreEnum) -> GenreInDb:
+def mock_genre(id: Optional[int], genre: GenreEnum) -> GenreInDb:
     return GenreInDb(id=id, name=genre)
 
 

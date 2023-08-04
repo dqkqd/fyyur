@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from pydantic import HttpUrl, field_serializer
 
@@ -12,7 +13,7 @@ class ShowBase(BaseSchema):
 
 
 class ShowInDb(ShowBase):
-    id: int | None = None
+    id: Optional[int]
 
 
 class ShowInForm(ShowBase):

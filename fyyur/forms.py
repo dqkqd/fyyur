@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import Any, Callable, TypeVar
+from typing import Any, Callable, Optional, TypeVar
 
 import phonenumbers
 from flask_wtf import FlaskForm, Form
@@ -41,7 +41,7 @@ class PhoneValidator:
         self.field_flags = {"required": True}
 
     @staticmethod
-    def _parse(number: str) -> PhoneNumber | None:
+    def _parse(number: str) -> Optional[PhoneNumber]:
         for region in ["US", None]:
             phone_number = phonenumbers.parse(number, region)
             if phonenumbers.is_possible_number(phone_number):
@@ -56,13 +56,13 @@ class PhoneValidator:
 
 
 class CustomDataRequiredValidator(DataRequired):  # type:ignore
-    def __init__(self, field: str | None = None):
+    def __init__(self, field: Optional[str] = None):
         message = f"{field} is required." if field else None
         super().__init__(message)
 
 
 class CustomURLValidator(URL):  # type: ignore
-    def __init__(self, require_tld: bool = True, field: str | None = None) -> None:
+    def __init__(self, require_tld: bool = True, field: Optional[str] = None) -> None:
         message = f"{field} : Invalid URL." if field else None
         super().__init__(require_tld, message)
 

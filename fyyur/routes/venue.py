@@ -1,3 +1,5 @@
+from typing import Optional, Union
+
 import sqlalchemy as sa
 from flask import (
     Blueprint,
@@ -68,7 +70,7 @@ def create_venue_form() -> str:
 
 
 @bp.route("/create", methods=["POST"])
-def create_venue_submission() -> FlaskResponse | str:
+def create_venue_submission() -> Union[FlaskResponse, str]:
     form = VenueForm()
     ok = insert_venue(form)
     if ok:
@@ -77,8 +79,8 @@ def create_venue_submission() -> FlaskResponse | str:
 
 
 @bp.route("/<int:venue_id>", methods=["DELETE"])
-def delete_venue(venue_id: int) -> FlaskResponse | str:
-    venue: Venue | None = Venue.query.filter_by(id=venue_id).first()
+def delete_venue(venue_id: int) -> Union[FlaskResponse, str]:
+    venue: Optional[Venue] = Venue.query.filter_by(id=venue_id).first()
     if venue is None:
         abort(404)
 
@@ -115,7 +117,7 @@ def edit_venue(venue_id: int) -> str:
 
 
 @bp.route("/<int:venue_id>/edit", methods=["POST"])
-def edit_venue_submission(venue_id: int) -> FlaskResponse | str:
+def edit_venue_submission(venue_id: int) -> Union[FlaskResponse, str]:
     form = VenueForm()
     ok = update_venue(form, venue_id)
     if ok:
@@ -153,14 +155,14 @@ def find_venues(search: SearchSchema) -> list[VenueResponse]:
     return [venue.venue_response for venue in venues]
 
 
-def get_venue_info(venue_id: int) -> VenueInfoResponse | None:
+def get_venue_info(venue_id: int) -> Optional[VenueInfoResponse]:
     venue: Venue = Venue.query.filter_by(id=venue_id).first()
     if venue is None:
         return None
     return venue.venue_info_response
 
 
-def form_to_venue(form: VenueForm) -> VenueInForm | None:
+def form_to_venue(form: VenueForm) -> Optional[VenueInForm]:
     if not form.validate_on_submit():
         for error in form.errors.values():
             for e in error:

@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import Union
 
 from flask import (
     Blueprint,
@@ -33,7 +34,7 @@ def create_shows() -> str:
 
 
 @bp.route("/create", methods=["POST"])
-def create_show_submission() -> FlaskResponse | str:
+def create_show_submission() -> Union[FlaskResponse, str]:
     form = ShowForm()
     ok = insert_show(form)
     if ok:

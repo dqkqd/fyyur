@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import HttpUrl, field_serializer
 
 from fyyur.schema.base import BaseSchema, State
@@ -20,21 +22,21 @@ class ArtistSearchResponse(ArtistResponse):
 class ArtistInfo(ArtistBase):
     city: str
     state: State
-    phone: str | None = None
+    phone: Optional[str] = None
 
-    image_link: HttpUrl | None = None
-    facebook_link: HttpUrl | None = None
-    website_link: HttpUrl | None = None
+    image_link: Optional[HttpUrl] = None
+    facebook_link: Optional[HttpUrl] = None
+    website_link: Optional[HttpUrl] = None
 
     seeking_venue: bool = False
-    seeking_description: str | None = None
+    seeking_description: Optional[str] = None
 
     @field_serializer("image_link", "facebook_link", "website_link", return_type=str)
     def serialize_url(self, url: HttpUrl) -> str:
         return str(url)
 
     @field_serializer("state")
-    def serialize_state(self, state: State | None) -> str | None:
+    def serialize_state(self, state: Optional[State]) -> Optional[str]:
         if state is None:
             return None
         return state.value
@@ -44,7 +46,7 @@ class ArtistInForm(ArtistInfo):
     genres: list[GenreEnum]
 
     @field_serializer("genres")
-    def serialize_genres(self, genres: list[GenreEnum]) -> list[str] | None:
+    def serialize_genres(self, genres: list[GenreEnum]) -> list[str]:
         return [genre.value for genre in genres]
 
 

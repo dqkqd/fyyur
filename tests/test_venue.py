@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 
 import pytest
 from flask import Flask
@@ -227,7 +227,7 @@ def test_find_venues_with_past_shows(app: Flask) -> None:
     ],
 )
 def test_get_venue_info(
-    app: Flask, venue_id: int, expected_venue_data: dict[str, Any] | None
+    app: Flask, venue_id: int, expected_venue_data: Optional[dict[str, Any]]
 ) -> None:
     with app.app_context():
         venue_info_response = get_venue_info(venue_id=venue_id)
