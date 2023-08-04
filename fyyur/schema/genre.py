@@ -1,12 +1,12 @@
-from enum import StrEnum
-from typing import Self
+from enum import Enum
 
 from pydantic import field_serializer
+from typing_extensions import Self
 
 from fyyur.schema.base import BaseSchema
 
 
-class GenreEnum(StrEnum):
+class GenreEnum(Enum):
     Alternative = "Alternative"
     Blues = "Blues"
     Classical = "Classical"

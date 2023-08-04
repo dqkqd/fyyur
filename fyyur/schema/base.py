@@ -1,4 +1,4 @@
-from enum import StrEnum
+from enum import Enum
 from typing import TYPE_CHECKING, TypeVar, Union
 
 from pydantic import BaseModel, ConfigDict
@@ -20,7 +20,7 @@ class SearchSchema(BaseModel):
     search_term: str = ""
 
 
-class State(StrEnum):
+class State(Enum):
     AL = "AL"
     AK = "AK"
     AZ = "AZ"
