@@ -14,7 +14,10 @@ from tests.mock import insert_mock_data
 @pytest.fixture()
 def app() -> Iterator[Flask]:
     test_app = create_app(TestingConfig)
-    os.remove(test_app.config["TEST_DB_PATH"])
+
+    test_db_path = test_app.config["TEST_DB_PATH"]
+    if os.path.exists(test_db_path):
+        os.remove(test_db_path)
 
     with test_app.app_context():
         db.create_all()
