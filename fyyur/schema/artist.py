@@ -51,7 +51,7 @@ class ArtistInForm(ArtistInfo):
 
 
 class ArtistInDb(ArtistInfo):
-    id: int
+    id: Optional[int] = None
     shows: list[ShowInDb] = []
     genres: list[GenreInDb] = []
 

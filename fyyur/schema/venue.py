@@ -66,7 +66,7 @@ class VenueInForm(VenueInfo):
 
 
 class VenueInDb(VenueInfo):
-    id: int
+    id: Optional[int] = None
     shows: list[ShowInDb] = []
     genres: list[GenreInDb] = []
 

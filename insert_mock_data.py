@@ -7,7 +7,6 @@ from fyyur.schema.show import ShowInDb
 from fyyur.schema.venue import VenueInDb
 
 artist1 = ArtistInDb(
-    id=4,
     name="Guns N Petals",
     city="San Francisco",
     state="CA",
@@ -20,7 +19,6 @@ artist1 = ArtistInDb(
 ).to_orm(Artist)
 
 artist2 = ArtistInDb(
-    id=5,
     name="Matt Quevedo",
     city="New York",
     state="NY",
@@ -31,7 +29,6 @@ artist2 = ArtistInDb(
 ).to_orm(Artist)
 
 artist3 = ArtistInDb(
-    id=6,
     name="The Wild Sax Band",
     city="San Francisco",
     state="CA",
@@ -41,7 +38,6 @@ artist3 = ArtistInDb(
 ).to_orm(Artist)
 
 venue1 = VenueInDb(
-    id=1,
     name="The Musical Hop",
     address="1015 Folsom Street",
     city="San Francisco",
@@ -55,7 +51,6 @@ venue1 = VenueInDb(
 ).to_orm(Venue)
 
 venue2 = VenueInDb(
-    id=2,
     name="The Dueling Pianos Bar",
     address="335 Delancey Street",
     city="New York",
@@ -68,7 +63,6 @@ venue2 = VenueInDb(
 ).to_orm(Venue)
 
 venue3 = VenueInDb(
-    id=3,
     name="Park Square Live Music & Coffee",
     address="34 Whiskey Moore Ave",
     city="San Francisco",
@@ -80,19 +74,19 @@ venue3 = VenueInDb(
     image_link="https://images.unsplash.com/photo-1485686531765-ba63b07845a7?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=747&q=80",
 ).to_orm(Venue)
 
-show1 = ShowInDb(venue_id=1, artist_id=4, start_time="2019-05-21T21:30:00.000Z").to_orm(
+show1 = ShowInDb(venue_id=1, artist_id=1, start_time="2019-05-21T21:30:00.000Z").to_orm(
     Show
 )
-show2 = ShowInDb(venue_id=3, artist_id=5, start_time="2019-06-15T23:00:00.000Z").to_orm(
+show2 = ShowInDb(venue_id=3, artist_id=2, start_time="2019-06-15T23:00:00.000Z").to_orm(
     Show
 )
-show3 = ShowInDb(venue_id=3, artist_id=6, start_time="2035-04-01T20:00:00.000Z").to_orm(
+show3 = ShowInDb(venue_id=3, artist_id=3, start_time="2035-04-01T20:00:00.000Z").to_orm(
     Show
 )
-show4 = ShowInDb(venue_id=3, artist_id=6, start_time="2035-04-08T20:00:00.000Z").to_orm(
+show4 = ShowInDb(venue_id=3, artist_id=3, start_time="2035-04-08T20:00:00.000Z").to_orm(
     Show
 )
-show5 = ShowInDb(venue_id=3, artist_id=6, start_time="2035-04-15T20:00:00.000Z").to_orm(
+show5 = ShowInDb(venue_id=3, artist_id=3, start_time="2035-04-15T20:00:00.000Z").to_orm(
     Show
 )
 
