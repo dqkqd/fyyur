@@ -60,10 +60,13 @@ def test_basic_insert_venue(app: Flask, client: FlaskClient) -> None:
         data = venue_in_form.model_dump(exclude={"seeking_talent"})
     else:
         data = venue_in_form.model_dump()
-    response = client.post("/venues/create", json=data)
-    assert response.status_code == 200
 
     with app.app_context():
+        # hasn't existed in database yet
+        assert Venue.query.filter_by(id=10).first() is None
+
+        client.post("/venues/create", json=data)
+
         venues: list[Venue] = Venue.query.filter_by(name="King Venue").all()
         assert len(venues) == 1
         assert venues[0].venue_in_form == venue_in_form
