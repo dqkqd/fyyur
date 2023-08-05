@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import TYPE_CHECKING
 
 import pytest
 from flask import Flask
@@ -11,9 +10,6 @@ from fyyur.schema.show import ShowResponse
 from tests.mock import mock_artist, mock_show, mock_venue
 from tests.utils import date_future
 
-if TYPE_CHECKING:
-    from werkzeug.test import TestResponse
-
 
 def test_get_shows_status_200(client: FlaskClient) -> None:
     response = client.get("/shows/")
@@ -23,10 +19,35 @@ def test_get_shows_status_200(client: FlaskClient) -> None:
 
 
 def add_show(
-    client: FlaskClient, venue_id: int, artist_id: int, day_offset: int
-) -> "TestResponse":
+    app: Flask, client: FlaskClient, venue_id: int, artist_id: int, day_offset: int
+) -> bool:
     show = mock_show(venue_id=venue_id, artist_id=artist_id, day_offset=day_offset)
-    return client.post("/shows/create", data=show.model_dump())
+
+    prior_existed: bool = False
+    existed: bool = False
+    with app.app_context():
+        prior_existed = (
+            Show.query.filter_by(
+                venue_id=show.venue_id,
+                artist_id=show.artist_id,
+                start_time=show.start_time,
+            ).first()
+            is not None
+        )
+
+        client.post("/shows/create", data=show.model_dump())
+
+        existed = (
+            Show.query.filter_by(
+                venue_id=show.venue_id,
+                artist_id=show.artist_id,
+                start_time=show.start_time,
+            ).first()
+            is not None
+        )
+
+    inserted = not prior_existed and existed
+    return inserted
 
 
 def test_create_show_successful(app: Flask, client: FlaskClient) -> None:
@@ -37,24 +58,13 @@ def test_create_show_successful(app: Flask, client: FlaskClient) -> None:
         db.session.add(artist)
         db.session.commit()
 
-    # this show hasn't exist in database yet
-    with app.app_context():
-        assert not Show.query.filter_by(venue_id=100, artist_id=200).all()
-
     # inserted into database
-    response = add_show(client=client, venue_id=100, artist_id=200, day_offset=100)
-    assert response.status_code == 200
-
-    with app.app_context():
-        shows = Show.query.filter_by(venue_id=100, artist_id=200).all()
-        assert len(shows) == 1
+    assert add_show(app=app, client=client, venue_id=100, artist_id=200, day_offset=100)
 
 
 def test_get_shows(app: Flask, client: FlaskClient) -> None:
-    response = add_show(client=client, venue_id=1, artist_id=1, day_offset=100)
-    assert response.status_code == 200
-    response = add_show(client=client, venue_id=1, artist_id=2, day_offset=200)
-    assert response.status_code == 200
+    assert add_show(app=app, client=client, venue_id=1, artist_id=1, day_offset=100)
+    assert add_show(app=app, client=client, venue_id=1, artist_id=2, day_offset=200)
 
     expected_shows: list[dict[str, int | str | datetime]] = [
         {
@@ -87,50 +97,32 @@ def test_get_shows(app: Flask, client: FlaskClient) -> None:
 def test_create_show_venue_or_artist_doesnt_exist(
     app: Flask, client: FlaskClient, venue_id: int, artist_id: int
 ) -> None:
-    response = add_show(
-        client=client, venue_id=venue_id, artist_id=artist_id, day_offset=100
+    assert not add_show(
+        app=app, client=client, venue_id=venue_id, artist_id=artist_id, day_offset=100
     )
 
-    # redirecting to /shows/create again
-    assert response.status_code == 302
 
-    # nothing is inserted into database
-    with app.app_context():
-        assert not Show.query.filter_by(venue_id=venue_id, artist_id=artist_id).all()
+def test_create_show_duplicated(app: Flask, client: FlaskClient) -> None:
+    assert add_show(app=app, client=client, venue_id=1, artist_id=1, day_offset=100)
+    assert not add_show(app=app, client=client, venue_id=1, artist_id=1, day_offset=100)
 
 
-def test_create_show_duplicated(client: FlaskClient) -> None:
-    response = add_show(client=client, venue_id=1, artist_id=1, day_offset=100)
-    assert response.status_code == 200
-
-    response = add_show(client=client, venue_id=1, artist_id=1, day_offset=100)
-    assert response.status_code == 302
+def test_create_show_same_date_same_venue(app: Flask, client: FlaskClient) -> None:
+    assert add_show(app=app, client=client, venue_id=1, artist_id=1, day_offset=100)
+    assert not add_show(app=app, client=client, venue_id=1, artist_id=2, day_offset=100)
 
 
-def test_create_show_same_date_same_venue(client: FlaskClient) -> None:
-    response = add_show(client=client, venue_id=1, artist_id=1, day_offset=100)
-    assert response.status_code == 200
-
-    response = add_show(client=client, venue_id=1, artist_id=2, day_offset=100)
-    assert response.status_code == 302
+def test_create_show_same_date_same_artist(app: Flask, client: FlaskClient) -> None:
+    assert add_show(app=app, client=client, venue_id=1, artist_id=1, day_offset=100)
+    assert not add_show(app=app, client=client, venue_id=2, artist_id=1, day_offset=100)
 
 
-def test_create_show_same_date_same_artist(client: FlaskClient) -> None:
-    response = add_show(client=client, venue_id=1, artist_id=1, day_offset=100)
-    assert response.status_code == 200
-
-    response = add_show(client=client, venue_id=2, artist_id=1, day_offset=100)
-    assert response.status_code == 302
-
-
-def test_create_show_same_date_different_venue_and_artist(client: FlaskClient) -> None:
-    response = add_show(client=client, venue_id=1, artist_id=1, day_offset=100)
-    assert response.status_code == 200
-
-    response = add_show(client=client, venue_id=2, artist_id=2, day_offset=100)
-    assert response.status_code == 200
+def test_create_show_same_date_different_venue_and_artist(
+    app: Flask, client: FlaskClient
+) -> None:
+    assert add_show(app=app, client=client, venue_id=1, artist_id=1, day_offset=100)
+    assert add_show(app=app, client=client, venue_id=2, artist_id=2, day_offset=100)
 
 
-def test_create_show_in_the_past(client: FlaskClient) -> None:
-    response = add_show(client=client, venue_id=2, artist_id=2, day_offset=-100)
-    assert response.status_code == 302
+def test_create_show_in_the_past(app: Flask, client: FlaskClient) -> None:
+    assert not add_show(app=app, client=client, venue_id=2, artist_id=2, day_offset=-100)
