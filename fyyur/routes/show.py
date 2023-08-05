@@ -38,7 +38,7 @@ def create_show_submission() -> Union[FlaskResponse, str]:
     form = ShowForm()
     ok = insert_show(form)
     if ok:
-        return render_template("pages/home.html")
+        return redirect(url_for("index"))
     return redirect(url_for("show.create_shows"))
 
 
