@@ -86,7 +86,7 @@ def create_artist_submission() -> Union[FlaskResponse, str]:
     form = ArtistForm()
     ok = insert_artist(form)
     if ok:
-        return render_template("pages/home.html")
+        return redirect(url_for("index"))
     return redirect(url_for("artist.create_artist_form"))
 
 

@@ -74,7 +74,7 @@ def create_venue_submission() -> Union[FlaskResponse, str]:
     form = VenueForm()
     ok = insert_venue(form)
     if ok:
-        return render_template("pages/home.html")
+        return redirect(url_for("index"))
     return redirect(url_for("venue.create_venue_form"))
 
 
