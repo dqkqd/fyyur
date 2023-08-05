@@ -1,18 +1,30 @@
+from datetime import datetime
 from typing import Optional, Union
 
-from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
+from flask import (
+    Blueprint,
+    abort,
+    current_app,
+    flash,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
 from pydantic import ValidationError
 from werkzeug.wrappers.response import Response as FlaskResponse
 
 from fyyur.forms import ArtistForm
-from fyyur.models import Artist, Genre, db
+from fyyur.models import Artist, Genre, Show, Venue, db
 from fyyur.schema.artist import (
+    ArtistInfo,
     ArtistInfoResponse,
     ArtistInForm,
     ArtistResponse,
     ArtistSearchResponse,
 )
 from fyyur.schema.base import SearchSchema
+from fyyur.schema.show import ShowInArtistInfo
 
 bp = Blueprint("artist", __name__, url_prefix="/artists")
 
@@ -106,7 +118,39 @@ def get_artist_info(artist_id: int) -> Optional[ArtistInfoResponse]:
     artist: Artist = Artist.query.filter_by(id=artist_id).first()
     if artist is None:
         return None
-    return artist.artist_info_response
+
+    shows_query = (
+        db.session.query(
+            Venue.id.label("venue_id"),
+            Venue.name.label("venue_name"),
+            Venue.image_link.label("venue_image_link"),
+            Show.start_time,
+        )
+        .join(Venue, Show.venue_id == Venue.id)
+        .filter(Show.artist_id == artist_id)
+    )
+
+    upcoming_shows_query = shows_query.filter(Show.start_time >= datetime.now())
+    past_shows_query = shows_query.filter(Show.start_time < datetime.now())
+
+    with current_app.app_context():
+        upcoming_shows = [
+            ShowInArtistInfo.model_validate(row) for row in upcoming_shows_query.all()
+        ]
+        past_shows = [
+            ShowInArtistInfo.model_validate(row) for row in past_shows_query.all()
+        ]
+
+    artist_info = ArtistInfo.model_validate(artist)
+    return ArtistInfoResponse(
+        **artist_info.model_dump(),
+        id=artist.id,
+        genres=[genre.name for genre in artist.genres],
+        past_shows=past_shows,
+        upcoming_shows=upcoming_shows,
+        past_shows_count=len(past_shows),
+        upcoming_shows_count=len(upcoming_shows),
+    )
 
 
 def form_to_artist(form: ArtistForm) -> Optional[ArtistInForm]:

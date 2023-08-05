@@ -1,9 +1,11 @@
+from datetime import datetime
 from typing import Optional, Union
 
 import sqlalchemy as sa
 from flask import (
     Blueprint,
     abort,
+    current_app,
     flash,
     jsonify,
     redirect,
@@ -15,10 +17,12 @@ from pydantic import ValidationError
 from werkzeug.wrappers.response import Response as FlaskResponse
 
 from fyyur.forms import VenueForm
-from fyyur.models import Genre, Venue, db
+from fyyur.models import Artist, Genre, Show, Venue, db
 from fyyur.schema.base import SearchSchema
+from fyyur.schema.show import ShowInVenueInfo
 from fyyur.schema.venue import (
     VenueEditReponse,
+    VenueInfo,
     VenueInfoResponse,
     VenueInForm,
     VenueLocation,
@@ -159,6 +163,40 @@ def get_venue_info(venue_id: int) -> Optional[VenueInfoResponse]:
     venue: Venue = Venue.query.filter_by(id=venue_id).first()
     if venue is None:
         return None
+
+    shows_query = (
+        db.session.query(
+            Artist.id.label("artist_id"),
+            Artist.name.label("artist_name"),
+            Artist.image_link.label("artist_image_link"),
+            Show.start_time,
+        )
+        .join(Artist, Show.artist_id == Artist.id)
+        .filter(Show.venue_id == venue_id)
+    )
+
+    upcoming_shows_query = shows_query.filter(Show.start_time >= datetime.now())
+    past_shows_query = shows_query.filter(Show.start_time < datetime.now())
+
+    with current_app.app_context():
+        upcoming_shows = [
+            ShowInVenueInfo.model_validate(row) for row in upcoming_shows_query.all()
+        ]
+        past_shows = [
+            ShowInVenueInfo.model_validate(row) for row in past_shows_query.all()
+        ]
+
+    venue_info = VenueInfo.model_validate(venue)
+    return VenueInfoResponse(
+        **venue_info.model_dump(),
+        id=venue.id,
+        genres=[genre.name for genre in venue.genres],
+        past_shows=past_shows,
+        upcoming_shows=upcoming_shows,
+        past_shows_count=len(past_shows),
+        upcoming_shows_count=len(upcoming_shows),
+    )
+
     return venue.venue_info_response
 
 
