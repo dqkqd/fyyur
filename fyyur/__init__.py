@@ -56,11 +56,11 @@ def create_app(config_object: type[Config] = NormalConfig) -> Flask:
     def index() -> str:
         recent_venues = [
             VenueResponse.model_validate(venue)
-            for venue in Venue.query.order_by(Venue.create_date).limit(10).all()
+            for venue in Venue.query.order_by(Venue.create_date.desc()).limit(10).all()
         ]
         recent_artists = [
             ArtistResponse.model_validate(artist)
-            for artist in Artist.query.order_by(Artist.create_date).limit(10).all()
+            for artist in Artist.query.order_by(Artist.create_date.desc()).limit(10).all()
         ]
         return render_template(
             "pages/home.html", recent_venues=recent_venues, recent_artists=recent_artists
