@@ -230,10 +230,12 @@ def test_basic_insert_artist(app: Flask, client: FlaskClient) -> None:
     artist = mock_artist(id=10, name="King")
     artist_in_form = artist.to_orm(Artist).artist_in_form
     artist_in_form.genres = [GenreEnum.Blues, GenreEnum.Pop]
-    response = client.post("/artists/create", data=artist_in_form.model_dump())
-    assert response.status_code == 200
 
     with app.app_context():
+        # hasn't existed in database yet
+        assert Artist.query.filter_by(id=10).first() is None
+        client.post("/artists/create", data=artist_in_form.model_dump())
+
         artists: list[Artist] = Artist.query.filter_by(name="King").all()
         assert len(artists) == 1
         assert artists[0].artist_in_form == artist_in_form
@@ -248,10 +250,8 @@ def test_insert_artist_should_insert_genre(app: Flask, client: FlaskClient) -> N
     with app.app_context():
         assert Genre.query.filter_by(name=GenreEnum.Folk.value).first() is None
 
-    response = client.post("/artists/create", data=artist_in_form.model_dump())
-    assert response.status_code == 200
+        client.post("/artists/create", data=artist_in_form.model_dump())
 
-    with app.app_context():
         assert Genre.query.filter_by(name=GenreEnum.Folk.value).first() is not None
 
 
@@ -261,8 +261,7 @@ def test_insert_artist_should_not_insert_duplicated_genres(
     artist = mock_artist(id=10, name="King")
     artist_in_form = artist.to_orm(Artist).artist_in_form
     artist_in_form.genres = [GenreEnum.Folk]
-    response = client.post("/artists/create", data=artist_in_form.model_dump())
-    assert response.status_code == 200
+    client.post("/artists/create", data=artist_in_form.model_dump())
 
     with app.app_context():
         king: Artist = Artist.query.filter_by(name="King").first()
@@ -273,8 +272,7 @@ def test_insert_artist_should_not_insert_duplicated_genres(
     artist = mock_artist(id=20, name="Queen")
     artist_in_form = artist.to_orm(Artist).artist_in_form
     artist_in_form.genres = [GenreEnum.Folk]
-    response = client.post("/artists/create", data=artist_in_form.model_dump())
-    assert response.status_code == 200
+    client.post("/artists/create", data=artist_in_form.model_dump())
 
     with app.app_context():
         queen: Artist = Artist.query.filter_by(name="Queen").first()
