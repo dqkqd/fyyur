@@ -28,6 +28,9 @@ class GenreEnum(Enum):
     Soul = "Soul"
     Other = "Other"
 
+    def __str__(self) -> str:
+        return self.name
+
 
 class GenreBase(BaseSchema):
     name: GenreEnum

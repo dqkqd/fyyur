@@ -72,3 +72,6 @@ class State(Enum):
     WV = "WV"
     WI = "WI"
     WY = "WY"
+
+    def __str__(self) -> str:
+        return self.name
